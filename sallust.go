@@ -35,22 +35,28 @@ type Sink struct {
 	DisableRotation bool `json:"disableRotation" yaml:"disableRotation"`
 
 	// MaxSize is the maximum size of the log file before rotation, in megabytes.
+	// This field is ignored if DisableRotation is true.
 	MaxSize int `json:"maxsize" yaml:"maxsize"`
 
-	// MaxAge is the maximum number of days to retain old log files
+	// MaxAge is the maximum number of days to retain rotated log files
+	// This field is ignored if DisableRotation is true.
 	MaxAge int `json:"maxage" yaml:"maxage"`
 
-	// MaxBackups is the maximum number of backups to retain
+	// MaxBackups is the maximum number of rotated backups to retain
+	// This field is ignored if DisableRotation is true.
 	MaxBackups int `json:"maxbackups" yaml:"maxbackups"`
 
-	// LocalTime indicates that timestamps in log file names should be in local time.
+	// LocalTime indicates that timestamps in rotated log file names should be in local time.
 	// The default is false, indicating that log file names have UTC timestamps.
+	// This field is ignored if DisableRotation is true.
 	//
 	// NOTE: This field does NOT control timestamps in log messages.  It is used to
 	// generate backup log file names when log files are rotated.
 	LocalTime bool `json:"localtime" yaml:"localtime"`
 
-	// Compress indicates that log files should be compressed using gzip.
+	// Compress indicates that rotated log files should be compressed using gzip.
+	// This field is ignored if DisableRotation is true.
+	//
 	// The default is false, indicating no compression.
 	Compress bool `json:"compress" yaml:"compress"`
 
