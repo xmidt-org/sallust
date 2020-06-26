@@ -1,2 +1,2 @@
 # sallust
-Logging for microservices, bringing together structured logging with file management
+Brings together structured logging, file management, and DI-friendly configuration.
