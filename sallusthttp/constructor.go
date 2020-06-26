@@ -23,7 +23,7 @@ type Constructor struct {
 // This function may be used with gorilla/mux, e.g.:
 //
 //   var c Constructor
-//   c.Builders.Append(Named("myHandler"), DefaultFields)
+//   c.Builders.Add(Named("myHandler"), DefaultFields)
 //   r := mux.NewRouter()
 //   r.UseMiddleware(c.Decorate)
 //   r.Handle("/", MyHandler)

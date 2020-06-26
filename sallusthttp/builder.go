@@ -34,9 +34,8 @@ func (b Builders) Build(r *http.Request, l *zap.Logger) *zap.Logger {
 	return l
 }
 
-// Append adds more Builder strategies to this Builders sequence.  This method
-// is valid to use on an uninitialized Builders slice.
-func (b *Builders) Append(more ...Builder) {
+// Add appends more Builder strategies to this Builders sequence
+func (b *Builders) Add(more ...Builder) {
 	*b = append(*b, more...)
 }
 
