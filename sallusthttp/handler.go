@@ -3,7 +3,6 @@ package sallusthttp
 import (
 	"net/http"
 
-	"github.com/xmidt-org/sallust"
 	"go.uber.org/zap"
 )
 
@@ -20,10 +19,5 @@ type handler struct {
 // may use sallust.Get(request.Context()) to access that logger.
 func (h *handler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 	logger := h.builder(request, h.base)
-	h.ServeHTTP(
-		response,
-		request.WithContext(
-			sallust.With(request.Context(), logger),
-		),
-	)
+	h.ServeHTTP(response, With(request, logger))
 }
