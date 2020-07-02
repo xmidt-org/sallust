@@ -14,7 +14,7 @@ import (
 //
 // See: https://pkg.go.dev/go.uber.org/zap?tab=doc#Config.Build
 type Options struct {
-	// Level is the dynamic log level.  Unlike zap, this field is defaulted to zapcore.PanicLevel.
+	// Level is the dynamic log level.  Unlike zap, this field is defaulted to zapcore.ErrorLevel.
 	// No error will be returned if this field is left unset.
 	Level zap.AtomicLevel `json:"level" yaml:"level"`
 
@@ -69,7 +69,7 @@ func (o Options) NewZapConfig() (zap.Config, error) {
 	}
 
 	if zapConfig.Level == (zap.AtomicLevel{}) {
-		zapConfig.Level = zap.NewAtomicLevelAt(zap.PanicLevel)
+		zapConfig.Level = zap.NewAtomicLevelAt(zap.ErrorLevel)
 	}
 
 	if o.Rotation != nil {
@@ -88,5 +88,5 @@ func (o Options) NewLogger(opts ...zap.Option) (*zap.Logger, error) {
 		return nil, err
 	}
 
-	return zapConfig.Build()
+	return zapConfig.Build(opts...)
 }
