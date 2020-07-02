@@ -96,8 +96,8 @@ func (r Rotation) NewURL(path string) *url.URL {
 	}
 }
 
-// Lumberjack is a zap.Sink that writes to a lumberjack writer.
-// This type also implements Rotater and io.Closer.
+// Lumberjack is a zap.Sink adapter that writes to a lumberjack Logger.
+// This type also implements Rotater.
 //
 // A Lumberjack is safe for concurrent writes.  No additional synchronization
 // is required.
@@ -106,13 +106,15 @@ type Lumberjack struct {
 }
 
 var _ zap.Sink = Lumberjack{}
+var _ Rotater = Lumberjack{}
 
 // Sync is a nop, and implements zapcore.WriteSyncer
 func (lj Lumberjack) Sync() error {
 	return nil
 }
 
-// NewLumberjackSink creates a zap.Sink which rotates its corresponding file
+// NewLumberjackSink creates a zap.Sink which rotates its corresponding file.
+// This packages registers this a factory with zap.RegisterSink.
 func NewLumberjackSink(u *url.URL) (zap.Sink, error) {
 	lj := Lumberjack{
 		Logger: &lumberjack.Logger{
