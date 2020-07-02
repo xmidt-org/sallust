@@ -60,8 +60,8 @@ type Rotation struct {
 	Compress bool `json:"compress" yaml:"compress"`
 }
 
-// AddQuery adds the set of URL query parameters for these Rotation options
-func (r Rotation) AddQuery(v url.Values) {
+// AddQueryValues adds the set of URL query parameters for these Rotation options
+func (r Rotation) AddQueryValues(v url.Values) {
 	if r.MaxSize > 0 {
 		v.Set(MaxSizeParameter, strconv.Itoa(r.MaxSize))
 	}
@@ -87,7 +87,7 @@ func (r Rotation) AddQuery(v url.Values) {
 // using this set of Rotation options
 func (r Rotation) NewURL(path string) *url.URL {
 	v := url.Values{}
-	r.AddQuery(v)
+	r.AddQueryValues(v)
 
 	return &url.URL{
 		Scheme:   LumberjackScheme,
@@ -114,7 +114,7 @@ func (lj Lumberjack) Sync() error {
 
 // NewLumberjackSink creates a zap.Sink which rotates its corresponding file
 func NewLumberjackSink(u *url.URL) (zap.Sink, error) {
-	lj := &Lumberjack{
+	lj := Lumberjack{
 		Logger: &lumberjack.Logger{
 			Filename: u.Path,
 		},
