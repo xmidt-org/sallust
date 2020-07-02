@@ -110,9 +110,110 @@ func testRotationNewURL(t *testing.T) {
 	}
 }
 
+func testRotationTransformURL(t *testing.T) {
+	var (
+		r = Rotation{
+			MaxAge:     12,
+			MaxBackups: 532,
+			MaxSize:    5729874,
+			Compress:   true,
+			LocalTime:  true,
+		}
+
+		testData = []struct {
+			original string
+			expected string
+		}{
+			{
+				original: "",
+				expected: "",
+			},
+			{
+				original: "stdout",
+				expected: "stdout",
+			},
+			{
+				original: "stderr",
+				expected: "stderr",
+			},
+			{
+				original: "/var/log/foo.json",
+				expected: "lumberjack:///var/log/foo.json?compress=true&localTime=true&maxAge=12&maxBackups=532&maxSize=5729874",
+			},
+			{
+				original: "file:///var/log/foo.json",
+				expected: "lumberjack:///var/log/foo.json?compress=true&localTime=true&maxAge=12&maxBackups=532&maxSize=5729874",
+			},
+			{
+				original: "\tthis\nisnotvalid",
+				expected: "\tthis\nisnotvalid",
+			},
+		}
+	)
+
+	for i, record := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			var (
+				assert = assert.New(t)
+				actual = r.TransformURL(record.original)
+			)
+
+			assert.Equal(record.expected, actual)
+		})
+	}
+}
+
+func testRotationTransformURLs(t *testing.T) {
+	var (
+		r = Rotation{
+			MaxAge:     345,
+			MaxBackups: 4,
+			MaxSize:    3739,
+			Compress:   true,
+			LocalTime:  true,
+		}
+
+		testData = []struct {
+			original []string
+			expected []string
+		}{
+			{
+				original: nil,
+				expected: nil,
+			},
+			{
+				original: []string{},
+				expected: nil,
+			},
+			{
+				original: []string{"stdout", "/log.json", "file:///log.json", "\tinvalid\n"},
+				expected: []string{
+					"stdout",
+					"lumberjack:///log.json?compress=true&localTime=true&maxAge=345&maxBackups=4&maxSize=3739",
+					"lumberjack:///log.json?compress=true&localTime=true&maxAge=345&maxBackups=4&maxSize=3739",
+					"\tinvalid\n",
+				},
+			},
+		}
+	)
+
+	for i, record := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			var (
+				assert = assert.New(t)
+				actual = r.TransformURLs(record.original...)
+			)
+
+			assert.Equal(record.expected, actual)
+		})
+	}
+}
+
 func TestRotation(t *testing.T) {
 	t.Run("AddQueryValues", testRotationAddQueryValues)
 	t.Run("NewURL", testRotationNewURL)
+	t.Run("TransformURL", testRotationTransformURL)
+	t.Run("TransformURLs", testRotationTransformURLs)
 }
 
 func testLumberjackSync(t *testing.T) {

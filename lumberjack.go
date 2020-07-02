@@ -96,6 +96,44 @@ func (r Rotation) NewURL(path string) *url.URL {
 	}
 }
 
+// TransformURL conditionally turns its argument into a lumberjack-rotatable
+// file URL.  The parameter 'u' may be "stdout", "stderr", or a valid URL.
+// In the case of "stdout" or "stderr", the parameter is returned as is.  If it
+// is a valid URL with an empty scheme or a scheme of "file", then it is transformed
+// via NewURL.  Otherwise, the string is returned as is.
+func (r Rotation) TransformURL(u string) string {
+	if u == "stdout" || u == "stderr" {
+		return u
+	}
+
+	p, err := url.Parse(u)
+	if err != nil {
+		return u // allow for invalid URLs to be used as log sink locations
+	}
+
+	// no path means no filename
+	if len(p.Path) > 0 && (p.Scheme == "" || p.Scheme == "file") {
+		return r.NewURL(p.Path).String()
+	}
+
+	return u
+}
+
+// TransformURLs is like TransformURL, save that it returns a sequence of the
+// results of transforming zero or more URLs.
+func (r Rotation) TransformURLs(urls ...string) []string {
+	if len(urls) == 0 {
+		return nil
+	}
+
+	transformed := make([]string, 0, len(urls))
+	for _, u := range urls {
+		transformed = append(transformed, r.TransformURL(u))
+	}
+
+	return transformed
+}
+
 // Lumberjack is a zap.Sink adapter that writes to a lumberjack Logger.
 // This type also implements Rotater.
 //

@@ -1,8 +1,6 @@
 package sallust
 
 import (
-	"net/url"
-
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -75,25 +73,8 @@ func (o Options) NewZapConfig() (zap.Config, error) {
 	}
 
 	if o.Rotation != nil {
-		zapConfig.OutputPaths = make([]string, 0, len(o.OutputPaths))
-		for _, path := range zapConfig.OutputPaths {
-			if path == "stdout" || path == "stderr" {
-				zapConfig.OutputPaths = append(zapConfig.OutputPaths, path)
-				continue
-			}
-
-			u, err := url.Parse(path)
-			if err != nil {
-				return zap.Config{}, err
-			}
-
-			if u.Scheme != "" && u.Scheme != "file" {
-				zapConfig.OutputPaths = append(zapConfig.OutputPaths, path)
-				continue
-			}
-
-			zapConfig.OutputPaths = append(zapConfig.OutputPaths, o.Rotation.NewURL(path).String())
-		}
+		zapConfig.OutputPaths = o.Rotation.TransformURLs(o.OutputPaths...)
+		zapConfig.ErrorOutputPaths = o.Rotation.TransformURLs(o.ErrorOutputPaths...)
 	}
 
 	return zapConfig, nil
