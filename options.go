@@ -1,6 +1,8 @@
 package sallust
 
 import (
+	"os"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -46,6 +48,15 @@ type Options struct {
 	// InitialFields is the same as zap.Config.InitialFields
 	InitialFields map[string]interface{} `json:"initialFields" yaml:"initialFields"`
 
+	// DisablePathExpansion controls whether the paths in OutputPaths and ErrorOutputPaths
+	// are expanded.  If this field is set to true, Mapping is ignored and no
+	// expansion, even with environment variables, is performed.
+	DisablePathExpansion bool `json:"disablePathExpansion" yaml:"disablePathExpansion"`
+
+	// Mapping is an optional strategy for expanding variables in output paths.
+	// If not supplied, os.Getenv is used.
+	Mapping func(string) string `json:"-" yaml:"-"`
+
 	// Rotation describes the set of log file rotation options.  This field is optional,
 	// and if unset log files are not rotated.
 	Rotation *Rotation `json:"rotation,omitempty" yaml:"rotation,omitempty"`
@@ -55,29 +66,45 @@ type Options struct {
 // Primarily, this involves creating lumberjack URLs so that the registered sink
 // will create the appropriate infrastructure to do log file rotation.
 func (o Options) NewZapConfig() (zap.Config, error) {
-	zapConfig := zap.Config{
-		Level:             o.Level,
+	pt := PathTransformer{
+		Rotation: o.Rotation,
+	}
+
+	if !o.DisablePathExpansion {
+		pt.Mapping = o.Mapping
+		if pt.Mapping == nil {
+			pt.Mapping = os.Getenv
+		}
+	}
+
+	outputPaths, err := ApplyTransform(pt.Transform, o.OutputPaths...)
+	if err != nil {
+		return zap.Config{}, err
+	}
+
+	errorOutputPaths, err := ApplyTransform(pt.Transform, o.ErrorOutputPaths...)
+	if err != nil {
+		return zap.Config{}, err
+	}
+
+	level := o.Level
+	if level == (zap.AtomicLevel{}) {
+		// difference from zap:  we let this be unset, and default it to ErrorLevel
+		level = zap.NewAtomicLevelAt(zap.ErrorLevel)
+	}
+
+	return zap.Config{
+		Level:             level,
 		Development:       o.Development,
 		DisableCaller:     o.DisableCaller,
 		DisableStacktrace: o.DisableStacktrace,
 		Sampling:          o.Sampling,
 		Encoding:          o.Encoding,
 		EncoderConfig:     o.EncoderConfig,
-		OutputPaths:       o.OutputPaths,
-		ErrorOutputPaths:  o.ErrorOutputPaths,
+		OutputPaths:       outputPaths,
+		ErrorOutputPaths:  errorOutputPaths,
 		InitialFields:     o.InitialFields,
-	}
-
-	if zapConfig.Level == (zap.AtomicLevel{}) {
-		zapConfig.Level = zap.NewAtomicLevelAt(zap.ErrorLevel)
-	}
-
-	if o.Rotation != nil {
-		zapConfig.OutputPaths = o.Rotation.TransformURLs(o.OutputPaths...)
-		zapConfig.ErrorOutputPaths = o.Rotation.TransformURLs(o.ErrorOutputPaths...)
-	}
-
-	return zapConfig, nil
+	}, nil
 }
 
 // NewLogger behaves similarly to zap.Config.Build.  It uses the configuration created
