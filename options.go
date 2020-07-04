@@ -32,7 +32,8 @@ type Options struct {
 	// Sampling is the same as zap.Config.Sampling
 	Sampling *zap.SamplingConfig `json:"sampling" yaml:"sampling"`
 
-	// Encoding is the same as zap.Config.Encoding
+	// Encoding is the same as zap.Config.Encoding.  Unlike zap, this field is defaulted to "json".
+	// No error will be returned if this field is left unset.
 	Encoding string `json:"encoding" yaml:"encoding"`
 
 	// EncoderConfig is the same as zap.Config.EncoderConfig
@@ -93,13 +94,18 @@ func (o Options) NewZapConfig() (zap.Config, error) {
 		level = zap.NewAtomicLevelAt(zap.ErrorLevel)
 	}
 
+	encoding := o.Encoding
+	if len(encoding) == 0 {
+		encoding = "json"
+	}
+
 	return zap.Config{
 		Level:             level,
 		Development:       o.Development,
 		DisableCaller:     o.DisableCaller,
 		DisableStacktrace: o.DisableStacktrace,
 		Sampling:          o.Sampling,
-		Encoding:          o.Encoding,
+		Encoding:          encoding,
 		EncoderConfig:     o.EncoderConfig,
 		OutputPaths:       outputPaths,
 		ErrorOutputPaths:  errorOutputPaths,

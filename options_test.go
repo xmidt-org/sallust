@@ -1,6 +1,8 @@
 package sallust
 
 import (
+	"os"
+	"path/filepath"
 	"strconv"
 	"testing"
 
@@ -10,7 +12,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func testOptionsNewZapConfig(t *testing.T) {
+func testOptionsNewZapConfigSuccess(t *testing.T) {
 	testData := []struct {
 		options  Options
 		expected zap.Config
@@ -21,6 +23,7 @@ func testOptionsNewZapConfig(t *testing.T) {
 			},
 			expected: zap.Config{
 				Level:       zap.NewAtomicLevelAt(zapcore.ErrorLevel),
+				Encoding:    "json",
 				OutputPaths: []string{"/log.json"},
 			},
 		},
@@ -33,6 +36,7 @@ func testOptionsNewZapConfig(t *testing.T) {
 			},
 			expected: zap.Config{
 				Level:       zap.NewAtomicLevelAt(zapcore.ErrorLevel),
+				Encoding:    "json",
 				OutputPaths: []string{"lumberjack:///log.json?maxAge=10"},
 			},
 		},
@@ -94,6 +98,77 @@ func testOptionsNewZapConfig(t *testing.T) {
 	}
 }
 
+func testOptionsNewZapConfigBadOutputPath(t *testing.T) {
+	var (
+		assert  = assert.New(t)
+		options = Options{
+			Rotation:    new(Rotation),
+			OutputPaths: []string{"#%@(&%(@%XX"},
+		}
+	)
+
+	_, err := options.NewZapConfig()
+	assert.Error(err)
+}
+
+func testOptionsNewZapConfigBadErrorOutputPath(t *testing.T) {
+	var (
+		assert  = assert.New(t)
+		options = Options{
+			Rotation:         new(Rotation),
+			ErrorOutputPaths: []string{"#%@(&%(@%XX"},
+		}
+	)
+
+	_, err := options.NewZapConfig()
+	assert.Error(err)
+}
+
+func testOptionsNewLoggerSuccess(t *testing.T) {
+	var (
+		assert  = assert.New(t)
+		file    = filepath.Join(os.TempDir(), "sallust-test.json")
+		options = Options{
+			Rotation: &Rotation{
+				MaxSize: 100,
+			},
+			OutputPaths: []string{file},
+		}
+	)
+
+	defer os.Remove(file)
+	l, err := options.NewLogger()
+	assert.NoError(err)
+	assert.NotNil(l)
+}
+
+func testOptionsNewLoggerBadOutputPath(t *testing.T) {
+	var (
+		assert  = assert.New(t)
+		file    = filepath.Join(os.TempDir(), "#^@*&^$*%XX")
+		options = Options{
+			Rotation: &Rotation{
+				MaxSize: 100,
+			},
+			OutputPaths: []string{file},
+		}
+	)
+
+	defer os.Remove(file)
+	l, err := options.NewLogger()
+	assert.Error(err)
+	assert.Nil(l)
+}
+
 func TestOptions(t *testing.T) {
-	t.Run("NewZapConfig", testOptionsNewZapConfig)
+	t.Run("NewZapConfig", func(t *testing.T) {
+		t.Run("Success", testOptionsNewZapConfigSuccess)
+		t.Run("BadOutputPath", testOptionsNewZapConfigBadOutputPath)
+		t.Run("BadErrorOutputPath", testOptionsNewZapConfigBadErrorOutputPath)
+	})
+
+	t.Run("NewLogger", func(t *testing.T) {
+		t.Run("Success", testOptionsNewLoggerSuccess)
+		t.Run("BadOutputPath", testOptionsNewLoggerBadOutputPath)
+	})
 }
