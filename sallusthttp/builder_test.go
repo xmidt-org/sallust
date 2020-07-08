@@ -1,6 +1,7 @@
 package sallusthttp
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -19,6 +20,7 @@ func TestBuilders(t *testing.T) {
 			zap.String(DefaultMethodKey, "PUT"),
 			zap.String(DefaultRemoteAddrKey, "127.0.0.1"),
 			zap.String(DefaultURIKey, "/test"),
+			zap.String("testy", "mctest"),
 		}
 
 		buffer sallust.Buffer
@@ -36,6 +38,12 @@ func TestBuilders(t *testing.T) {
 
 	var b Builders
 	b.Add(Named("testHandler"), DefaultFields)
+	b.AddFields(
+		func(r *http.Request, f []zap.Field) []zap.Field {
+			return append(f, zap.String("testy", "mctest"))
+		},
+	)
+
 	l := b.Build(request, base)
 	require.NotNil(l)
 
@@ -53,4 +61,96 @@ func TestBuilders(t *testing.T) {
 
 	assert.Equal(1, n)
 	assert.NoError(err)
+}
+
+func TestMethod(t *testing.T) {
+	var (
+		assert  = assert.New(t)
+		require = require.New(t)
+		request = httptest.NewRequest("PUT", "/test", nil)
+	)
+
+	f := Method(request, nil)
+	require.Len(f, 1)
+	assert.Equal(
+		zap.String(DefaultMethodKey, "PUT"),
+		f[0],
+	)
+}
+
+func TestMethodCustom(t *testing.T) {
+	var (
+		assert  = assert.New(t)
+		require = require.New(t)
+		request = httptest.NewRequest("PUT", "/test", nil)
+	)
+
+	f := MethodCustom("test")(request, nil)
+	require.Len(f, 1)
+	assert.Equal(
+		zap.String("test", "PUT"),
+		f[0],
+	)
+}
+
+func TestURI(t *testing.T) {
+	var (
+		assert  = assert.New(t)
+		require = require.New(t)
+		request = httptest.NewRequest("PUT", "/test", nil)
+	)
+
+	f := URI(request, nil)
+	require.Len(f, 1)
+	assert.Equal(
+		zap.String(DefaultURIKey, "/test"),
+		f[0],
+	)
+}
+
+func TestURICustom(t *testing.T) {
+	var (
+		assert  = assert.New(t)
+		require = require.New(t)
+		request = httptest.NewRequest("PUT", "/test", nil)
+	)
+
+	f := URICustom("test")(request, nil)
+	require.Len(f, 1)
+	assert.Equal(
+		zap.String("test", "/test"),
+		f[0],
+	)
+}
+
+func TestRemoteAddr(t *testing.T) {
+	var (
+		assert  = assert.New(t)
+		require = require.New(t)
+		request = httptest.NewRequest("PUT", "/test", nil)
+	)
+
+	request.RemoteAddr = "172.3.4.5"
+	f := RemoteAddr(request, nil)
+	require.Len(f, 1)
+	assert.Equal(
+		zap.String(DefaultRemoteAddrKey, "172.3.4.5"),
+		f[0],
+	)
+}
+
+func TestRemoteAddrCustom(t *testing.T) {
+	var (
+		assert  = assert.New(t)
+		require = require.New(t)
+		request = httptest.NewRequest("PUT", "/test", nil)
+	)
+
+	request.RemoteAddr = "19.56.71.123"
+	f := RemoteAddrCustom("test")(request, nil)
+	require.Len(f, 1)
+	assert.Equal(
+		zap.String("test", "19.56.71.123"),
+		f[0],
+	)
 }
