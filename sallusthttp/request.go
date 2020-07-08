@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// With associated a zap.Logger with the given request
+// With associates a zap.Logger with the given request
 func With(parent *http.Request, logger *zap.Logger) *http.Request {
 	return parent.WithContext(
 		sallust.With(parent.Context(), logger),

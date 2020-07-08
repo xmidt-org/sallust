@@ -47,7 +47,7 @@ func Fields(fb ...FieldBuilder) Builder {
 // builders slice are not safe for concurrent access.
 type Builders []Builder
 
-// Build is itself a Builder that simply apply a sequence of strategies in order.
+// Build is itself a Builder that simply applies a sequence of strategies in order.
 // This method is safe for concurrent access.
 func (b Builders) Build(r *http.Request, l *zap.Logger) *zap.Logger {
 	for _, f := range b {
