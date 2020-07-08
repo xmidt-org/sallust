@@ -18,3 +18,9 @@ func With(parent *http.Request, logger *zap.Logger) *http.Request {
 func Get(r *http.Request) *zap.Logger {
 	return sallust.Get(r.Context())
 }
+
+// GetDefault returns the zap.Logger associated with the request,
+// falling back to the given default if no such logger is found
+func GetDefault(r *http.Request, def *zap.Logger) *zap.Logger {
+	return sallust.GetDefault(r.Context(), def)
+}
