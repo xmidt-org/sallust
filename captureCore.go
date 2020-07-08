@@ -135,12 +135,12 @@ func NewCaptureCore(enc zapcore.Encoder, ws zapcore.WriteSyncer, enab zapcore.Le
 	}
 }
 
-// SortedFields is a sortable slice of fields.  Keeping a slice
+// SortableFields is a sortable slice of fields.  Keeping a slice
 // of fields sorted helps with comparisons, particular during tests.
-type SortedFields []zap.Field
+type SortableFields []zap.Field
 
 // Len returns the length of this slice
-func (sf SortedFields) Len() int {
+func (sf SortableFields) Len() int {
 	return len(sf)
 }
 
@@ -149,7 +149,7 @@ func (sf SortedFields) Len() int {
 // be an issue as Field.Key should be unique in a given log message.  However, in cases
 // where all other struct fields of zap.Field are equal, this method gives
 // inconsistent results.
-func (sf SortedFields) Less(i, j int) bool {
+func (sf SortableFields) Less(i, j int) bool {
 	if sf[i].Key < sf[j].Key {
 		return true
 	} else if sf[i].Type < sf[j].Type {
@@ -163,6 +163,6 @@ func (sf SortedFields) Less(i, j int) bool {
 	return false
 }
 
-func (sf SortedFields) Swap(i, j int) {
+func (sf SortableFields) Swap(i, j int) {
 	sf[i], sf[j] = sf[j], sf[i]
 }
