@@ -79,7 +79,7 @@ func Named(name string) Builder {
 	}
 }
 
-// DefaultFields returns a Builder that simply appends the basic request fields implemented
+// DefaultFields is a Builder that simply appends the basic request fields implemented
 // in this package under their default logging keys
 func DefaultFields(r *http.Request, l *zap.Logger) *zap.Logger {
 	return l.With(
