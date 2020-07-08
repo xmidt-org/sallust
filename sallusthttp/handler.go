@@ -19,5 +19,5 @@ type handler struct {
 // may use sallust.Get(request.Context()) to access that logger.
 func (h *handler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 	logger := h.builder(request, h.base)
-	h.ServeHTTP(response, With(request, logger))
+	h.next.ServeHTTP(response, With(request, logger))
 }
