@@ -8,7 +8,8 @@ import (
 )
 
 // Options describes the set of options for building a single zap.Logger.  Most of these
-// fields are exactly the same as zap.Config.
+// fields are exactly the same as zap.Config.  Use of this type is optional.  It simply provides
+// easier configuration for certain features like log rotation.
 //
 // An Options instance is converted to a zap.Config by applying certain features,
 // such as log rotation.  Ultimately, zap.Config.Build is used to actually construct
