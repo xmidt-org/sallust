@@ -3,6 +3,7 @@ package sallust
 import (
 	"sync"
 
+	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -132,4 +133,36 @@ func NewCaptureCore(enc zapcore.Encoder, ws zapcore.WriteSyncer, enab zapcore.Le
 	return &CaptureCore{
 		Core: zapcore.NewCore(enc, ws, enab),
 	}
+}
+
+// SortedFields is a sortable slice of fields.  Keeping a slice
+// of fields sorted helps with comparisons, particular during tests.
+type SortedFields []zap.Field
+
+// Len returns the length of this slice
+func (sf SortedFields) Len() int {
+	return len(sf)
+}
+
+// Less compares the two sorted fields consistently, struct field by struct field.
+// NOTE: The Field.Interface is not used in this comparison.  Ordinarily, this won't
+// be an issue as Field.Key should be unique in a given log message.  However, in cases
+// where all other struct fields of zap.Field are equal, this method gives
+// inconsistent results.
+func (sf SortedFields) Less(i, j int) bool {
+	if sf[i].Key < sf[j].Key {
+		return true
+	} else if sf[i].Type < sf[j].Type {
+		return true
+	} else if sf[i].Integer < sf[j].Integer {
+		return true
+	} else if sf[i].String < sf[j].String {
+		return true
+	}
+
+	return false
+}
+
+func (sf SortedFields) Swap(i, j int) {
+	sf[i], sf[j] = sf[j], sf[i]
 }
