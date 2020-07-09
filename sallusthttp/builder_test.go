@@ -16,7 +16,7 @@ func TestBuilders(t *testing.T) {
 	var (
 		assert   = assert.New(t)
 		require  = require.New(t)
-		expected = sallust.SortableFields{
+		expected = []zapcore.Field{
 			zap.String(DefaultMethodKey, "PUT"),
 			zap.String(DefaultRemoteAddrKey, "127.0.0.1"),
 			zap.String(DefaultURIKey, "/test"),
