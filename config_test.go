@@ -19,7 +19,9 @@ func testConfigNewZapConfigSuccess(t *testing.T) {
 	}{
 		{
 			config: Config{
-				OutputPaths: []string{"/log.json"},
+				Config: zap.Config{
+					OutputPaths: []string{"/log.json"},
+				},
 			},
 			expected: zap.Config{
 				Level:       zap.NewAtomicLevelAt(zapcore.ErrorLevel),
@@ -29,7 +31,9 @@ func testConfigNewZapConfigSuccess(t *testing.T) {
 		},
 		{
 			config: Config{
-				OutputPaths: []string{"/log.json"},
+				Config: zap.Config{
+					OutputPaths: []string{"/log.json"},
+				},
 				Rotation: &Rotation{
 					MaxAge: 10,
 				},
@@ -42,17 +46,19 @@ func testConfigNewZapConfigSuccess(t *testing.T) {
 		},
 		{
 			config: Config{
-				Level:             zap.NewAtomicLevelAt(zapcore.DebugLevel),
-				Development:       true,
-				DisableCaller:     true,
-				DisableStacktrace: true,
-				Sampling:          &zap.SamplingConfig{},
-				Encoding:          "console",
-				EncoderConfig:     zapcore.EncoderConfig{},
-				OutputPaths:       []string{"stdout", "file:///log.json"},
-				ErrorOutputPaths:  []string{"stderr"},
-				InitialFields: map[string]interface{}{
-					"foo": "bar",
+				Config: zap.Config{
+					Level:             zap.NewAtomicLevelAt(zapcore.DebugLevel),
+					Development:       true,
+					DisableCaller:     true,
+					DisableStacktrace: true,
+					Sampling:          &zap.SamplingConfig{},
+					Encoding:          "console",
+					EncoderConfig:     zapcore.EncoderConfig{},
+					OutputPaths:       []string{"stdout", "file:///log.json"},
+					ErrorOutputPaths:  []string{"stderr"},
+					InitialFields: map[string]interface{}{
+						"foo": "bar",
+					},
 				},
 				Rotation: &Rotation{
 					MaxAge: 10,
@@ -102,8 +108,10 @@ func testConfigNewZapConfigBadOutputPath(t *testing.T) {
 	var (
 		assert = assert.New(t)
 		config = Config{
-			Rotation:    new(Rotation),
-			OutputPaths: []string{"#%@(&%(@%XX"},
+			Rotation: new(Rotation),
+			Config: zap.Config{
+				OutputPaths: []string{"#%@(&%(@%XX"},
+			},
 		}
 	)
 
@@ -115,8 +123,10 @@ func testConfigNewZapConfigBadErrorOutputPath(t *testing.T) {
 	var (
 		assert = assert.New(t)
 		config = Config{
-			Rotation:         new(Rotation),
-			ErrorOutputPaths: []string{"#%@(&%(@%XX"},
+			Rotation: new(Rotation),
+			Config: zap.Config{
+				ErrorOutputPaths: []string{"#%@(&%(@%XX"},
+			},
 		}
 	)
 
@@ -132,7 +142,9 @@ func testConfigNewLoggerSuccess(t *testing.T) {
 			Rotation: &Rotation{
 				MaxSize: 100,
 			},
-			OutputPaths: []string{file},
+			Config: zap.Config{
+				OutputPaths: []string{file},
+			},
 		}
 	)
 
@@ -150,7 +162,9 @@ func testConfigNewLoggerBadOutputPath(t *testing.T) {
 			Rotation: &Rotation{
 				MaxSize: 100,
 			},
-			OutputPaths: []string{file},
+			Config: zap.Config{
+				OutputPaths: []string{file},
+			},
 		}
 	)
 

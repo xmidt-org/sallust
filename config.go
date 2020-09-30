@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 // Config describes the set of options for building a single zap.Logger.  Most of these
@@ -17,38 +16,9 @@ import (
 //
 // See: https://pkg.go.dev/go.uber.org/zap?tab=doc#Config.Build
 type Config struct {
-	// Level is the dynamic log level.  Unlike zap, this field is defaulted to zapcore.ErrorLevel.
-	// No error will be returned if this field is left unset.
-	Level zap.AtomicLevel `json:"level" yaml:"level"`
-
-	// Development is the same as zap.Config.Development
-	Development bool `json:"development" yaml:"development"`
-
-	// DisableCaller is the same as zap.Config.DisableCaller
-	DisableCaller bool `json:"disableCaller" yaml:"disableCaller"`
-
-	// DisableStacktrace is the same as zap.Config.DisableStacktrace
-	DisableStacktrace bool `json:"disableStacktrace" yaml:"disableStacktrace"`
-
-	// Sampling is the same as zap.Config.Sampling
-	Sampling *zap.SamplingConfig `json:"sampling" yaml:"sampling"`
-
-	// Encoding is the same as zap.Config.Encoding.  Unlike zap, this field is defaulted to "json".
-	// No error will be returned if this field is left unset.
-	Encoding string `json:"encoding" yaml:"encoding"`
-
-	// EncoderConfig is the same as zap.Config.EncoderConfig
-	EncoderConfig zapcore.EncoderConfig `json:"encoderConfig" yaml:"encoderConfig"`
-
-	// OutputPaths is the same as zap.Config.OutputPaths.  If the Rotation field is
-	// specified, this slice is preprocessed to produce lumberjack-based zap.Sink objects.
-	OutputPaths []string `json:"outputPaths" yaml:"outputPaths"`
-
-	// ErrorOutputPaths is the same as zap.Config.ErrorOutputPaths
-	ErrorOutputPaths []string `json:"errorOutputPaths" yaml:"errorOutputPaths"`
-
-	// InitialFields is the same as zap.Config.InitialFields
-	InitialFields map[string]interface{} `json:"initialFields" yaml:"initialFields"`
+	// Config embeds all the usual fields from zap.  This is marked to squash so that
+	// these fields don't have to be nested.
+	zap.Config `mapstructure:",squash"`
 
 	// DisablePathExpansion controls whether the paths in OutputPaths and ErrorOutputPaths
 	// are expanded.  If this field is set to true, Mapping is ignored and no
@@ -67,7 +37,9 @@ type Config struct {
 // NewZapConfig creates a zap.Config enriched with features from these Options.
 // Primarily, this involves creating lumberjack URLs so that the registered sink
 // will create the appropriate infrastructure to do log file rotation.
-func (c Config) NewZapConfig() (zap.Config, error) {
+func (c Config) NewZapConfig() (zc zap.Config, err error) {
+	zc = c.Config
+
 	pt := PathTransformer{
 		Rotation: c.Rotation,
 	}
@@ -79,39 +51,23 @@ func (c Config) NewZapConfig() (zap.Config, error) {
 		}
 	}
 
-	outputPaths, err := ApplyTransform(pt.Transform, c.OutputPaths...)
-	if err != nil {
-		return zap.Config{}, err
+	zc.OutputPaths, err = ApplyTransform(pt.Transform, zc.OutputPaths...)
+	if err == nil {
+		zc.ErrorOutputPaths, err = ApplyTransform(pt.Transform, zc.ErrorOutputPaths...)
 	}
 
-	errorOutputPaths, err := ApplyTransform(pt.Transform, c.ErrorOutputPaths...)
-	if err != nil {
-		return zap.Config{}, err
-	}
-
-	level := c.Level
-	if level == (zap.AtomicLevel{}) {
+	if err == nil {
 		// difference from zap:  we let this be unset, and default it to ErrorLevel
-		level = zap.NewAtomicLevelAt(zap.ErrorLevel)
+		if zc.Level == (zap.AtomicLevel{}) {
+			zc.Level = zap.NewAtomicLevelAt(zap.ErrorLevel)
+		}
+
+		if len(zc.Encoding) == 0 {
+			zc.Encoding = "json"
+		}
 	}
 
-	encoding := c.Encoding
-	if len(encoding) == 0 {
-		encoding = "json"
-	}
-
-	return zap.Config{
-		Level:             level,
-		Development:       c.Development,
-		DisableCaller:     c.DisableCaller,
-		DisableStacktrace: c.DisableStacktrace,
-		Sampling:          c.Sampling,
-		Encoding:          encoding,
-		EncoderConfig:     c.EncoderConfig,
-		OutputPaths:       outputPaths,
-		ErrorOutputPaths:  errorOutputPaths,
-		InitialFields:     c.InitialFields,
-	}, nil
+	return
 }
 
 // NewLogger behaves similarly to zap.Config.Build.  It uses the configuration created
