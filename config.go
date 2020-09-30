@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// Options describes the set of options for building a single zap.Logger.  Most of these
+// Config describes the set of options for building a single zap.Logger.  Most of these
 // fields are exactly the same as zap.Config.  Use of this type is optional.  It simply provides
 // easier configuration for certain features like log rotation.
 //
@@ -16,7 +16,7 @@ import (
 // the logger.
 //
 // See: https://pkg.go.dev/go.uber.org/zap?tab=doc#Config.Build
-type Options struct {
+type Config struct {
 	// Level is the dynamic log level.  Unlike zap, this field is defaulted to zapcore.ErrorLevel.
 	// No error will be returned if this field is left unset.
 	Level zap.AtomicLevel `json:"level" yaml:"level"`
@@ -67,57 +67,57 @@ type Options struct {
 // NewZapConfig creates a zap.Config enriched with features from these Options.
 // Primarily, this involves creating lumberjack URLs so that the registered sink
 // will create the appropriate infrastructure to do log file rotation.
-func (o Options) NewZapConfig() (zap.Config, error) {
+func (c Config) NewZapConfig() (zap.Config, error) {
 	pt := PathTransformer{
-		Rotation: o.Rotation,
+		Rotation: c.Rotation,
 	}
 
-	if !o.DisablePathExpansion {
-		pt.Mapping = o.Mapping
+	if !c.DisablePathExpansion {
+		pt.Mapping = c.Mapping
 		if pt.Mapping == nil {
 			pt.Mapping = os.Getenv
 		}
 	}
 
-	outputPaths, err := ApplyTransform(pt.Transform, o.OutputPaths...)
+	outputPaths, err := ApplyTransform(pt.Transform, c.OutputPaths...)
 	if err != nil {
 		return zap.Config{}, err
 	}
 
-	errorOutputPaths, err := ApplyTransform(pt.Transform, o.ErrorOutputPaths...)
+	errorOutputPaths, err := ApplyTransform(pt.Transform, c.ErrorOutputPaths...)
 	if err != nil {
 		return zap.Config{}, err
 	}
 
-	level := o.Level
+	level := c.Level
 	if level == (zap.AtomicLevel{}) {
 		// difference from zap:  we let this be unset, and default it to ErrorLevel
 		level = zap.NewAtomicLevelAt(zap.ErrorLevel)
 	}
 
-	encoding := o.Encoding
+	encoding := c.Encoding
 	if len(encoding) == 0 {
 		encoding = "json"
 	}
 
 	return zap.Config{
 		Level:             level,
-		Development:       o.Development,
-		DisableCaller:     o.DisableCaller,
-		DisableStacktrace: o.DisableStacktrace,
-		Sampling:          o.Sampling,
+		Development:       c.Development,
+		DisableCaller:     c.DisableCaller,
+		DisableStacktrace: c.DisableStacktrace,
+		Sampling:          c.Sampling,
 		Encoding:          encoding,
-		EncoderConfig:     o.EncoderConfig,
+		EncoderConfig:     c.EncoderConfig,
 		OutputPaths:       outputPaths,
 		ErrorOutputPaths:  errorOutputPaths,
-		InitialFields:     o.InitialFields,
+		InitialFields:     c.InitialFields,
 	}, nil
 }
 
 // NewLogger behaves similarly to zap.Config.Build.  It uses the configuration created
 // by NewZapConfig to build the root logger.
-func (o Options) NewLogger(opts ...zap.Option) (*zap.Logger, error) {
-	zapConfig, err := o.NewZapConfig()
+func (c Config) NewLogger(opts ...zap.Option) (*zap.Logger, error) {
+	zapConfig, err := c.NewZapConfig()
 	if err != nil {
 		return nil, err
 	}

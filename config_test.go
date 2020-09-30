@@ -12,13 +12,13 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func testOptionsNewZapConfigSuccess(t *testing.T) {
+func testConfigNewZapConfigSuccess(t *testing.T) {
 	testData := []struct {
-		options  Options
+		config   Config
 		expected zap.Config
 	}{
 		{
-			options: Options{
+			config: Config{
 				OutputPaths: []string{"/log.json"},
 			},
 			expected: zap.Config{
@@ -28,7 +28,7 @@ func testOptionsNewZapConfigSuccess(t *testing.T) {
 			},
 		},
 		{
-			options: Options{
+			config: Config{
 				OutputPaths: []string{"/log.json"},
 				Rotation: &Rotation{
 					MaxAge: 10,
@@ -41,7 +41,7 @@ func testOptionsNewZapConfigSuccess(t *testing.T) {
 			},
 		},
 		{
-			options: Options{
+			config: Config{
 				Level:             zap.NewAtomicLevelAt(zapcore.DebugLevel),
 				Development:       true,
 				DisableCaller:     true,
@@ -80,7 +80,7 @@ func testOptionsNewZapConfigSuccess(t *testing.T) {
 			var (
 				assert      = assert.New(t)
 				require     = require.New(t)
-				actual, err = record.options.NewZapConfig()
+				actual, err = record.config.NewZapConfig()
 			)
 
 			require.NoError(err)
@@ -98,37 +98,37 @@ func testOptionsNewZapConfigSuccess(t *testing.T) {
 	}
 }
 
-func testOptionsNewZapConfigBadOutputPath(t *testing.T) {
+func testConfigNewZapConfigBadOutputPath(t *testing.T) {
 	var (
-		assert  = assert.New(t)
-		options = Options{
+		assert = assert.New(t)
+		config = Config{
 			Rotation:    new(Rotation),
 			OutputPaths: []string{"#%@(&%(@%XX"},
 		}
 	)
 
-	_, err := options.NewZapConfig()
+	_, err := config.NewZapConfig()
 	assert.Error(err)
 }
 
-func testOptionsNewZapConfigBadErrorOutputPath(t *testing.T) {
+func testConfigNewZapConfigBadErrorOutputPath(t *testing.T) {
 	var (
-		assert  = assert.New(t)
-		options = Options{
+		assert = assert.New(t)
+		config = Config{
 			Rotation:         new(Rotation),
 			ErrorOutputPaths: []string{"#%@(&%(@%XX"},
 		}
 	)
 
-	_, err := options.NewZapConfig()
+	_, err := config.NewZapConfig()
 	assert.Error(err)
 }
 
-func testOptionsNewLoggerSuccess(t *testing.T) {
+func testConfigNewLoggerSuccess(t *testing.T) {
 	var (
-		assert  = assert.New(t)
-		file    = filepath.Join(os.TempDir(), "sallust-test.json")
-		options = Options{
+		assert = assert.New(t)
+		file   = filepath.Join(os.TempDir(), "sallust-test.json")
+		config = Config{
 			Rotation: &Rotation{
 				MaxSize: 100,
 			},
@@ -137,16 +137,16 @@ func testOptionsNewLoggerSuccess(t *testing.T) {
 	)
 
 	defer os.Remove(file)
-	l, err := options.NewLogger()
+	l, err := config.NewLogger()
 	assert.NoError(err)
 	assert.NotNil(l)
 }
 
-func testOptionsNewLoggerBadOutputPath(t *testing.T) {
+func testConfigNewLoggerBadOutputPath(t *testing.T) {
 	var (
-		assert  = assert.New(t)
-		file    = filepath.Join(os.TempDir(), "#^@*&^$*%XX")
-		options = Options{
+		assert = assert.New(t)
+		file   = filepath.Join(os.TempDir(), "#^@*&^$*%XX")
+		config = Config{
 			Rotation: &Rotation{
 				MaxSize: 100,
 			},
@@ -155,20 +155,20 @@ func testOptionsNewLoggerBadOutputPath(t *testing.T) {
 	)
 
 	defer os.Remove(file)
-	l, err := options.NewLogger()
+	l, err := config.NewLogger()
 	assert.Error(err)
 	assert.Nil(l)
 }
 
-func TestOptions(t *testing.T) {
+func TestConfig(t *testing.T) {
 	t.Run("NewZapConfig", func(t *testing.T) {
-		t.Run("Success", testOptionsNewZapConfigSuccess)
-		t.Run("BadOutputPath", testOptionsNewZapConfigBadOutputPath)
-		t.Run("BadErrorOutputPath", testOptionsNewZapConfigBadErrorOutputPath)
+		t.Run("Success", testConfigNewZapConfigSuccess)
+		t.Run("BadOutputPath", testConfigNewZapConfigBadOutputPath)
+		t.Run("BadErrorOutputPath", testConfigNewZapConfigBadErrorOutputPath)
 	})
 
 	t.Run("NewLogger", func(t *testing.T) {
-		t.Run("Success", testOptionsNewLoggerSuccess)
-		t.Run("BadOutputPath", testOptionsNewLoggerBadOutputPath)
+		t.Run("Success", testConfigNewLoggerSuccess)
+		t.Run("BadOutputPath", testConfigNewLoggerBadOutputPath)
 	})
 }
