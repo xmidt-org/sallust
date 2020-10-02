@@ -11,7 +11,7 @@ var (
 	zapcoreLevelType      = reflect.TypeOf(zapcore.Level(0))
 	zapcoreLevelPtrType   = reflect.PtrTo(zapcoreLevelType)
 	zapAtomicLevelType    = reflect.TypeOf(zap.AtomicLevel{})
-	zapAtomicLevelPtrType = reflect.TypeOf(zapAtomicLevelType)
+	zapAtomicLevelPtrType = reflect.PtrTo(zapAtomicLevelType)
 )
 
 // StringToLevelHookFunc is a mapstructure DecodeHookFuncType implementation
@@ -42,28 +42,30 @@ var (
 // This function is necessary because libraries like spf13/viper do not directly unmarshal
 // into types.  Rather, they unmarshal first to a neutral format, e.g. map[string]interface{},
 // and then use mapstructure to take that format and convert it into a struct.
-func StringToLevelHookFunc(from, to reflect.Type, v interface{}) (interface{}, error) {
-	switch {
-	case from.Kind() != reflect.String:
-		return v, nil
+func StringToLevelHookFunc(from, to reflect.Type, src interface{}) (interface{}, error) {
+	if text, ok := src.(string); ok {
+		switch {
+		case to == zapcoreLevelType:
+			var l zapcore.Level
+			err := l.UnmarshalText([]byte(text))
+			return l, err
 
-	case to == zapcoreLevelType:
-		var l zapcore.Level
-		return l, l.UnmarshalText([]byte(v.(string)))
+		case to == zapcoreLevelPtrType:
+			l := new(zapcore.Level)
+			err := l.UnmarshalText([]byte(text))
+			return l, err
 
-	case to == zapcoreLevelPtrType:
-		l := new(zapcore.Level)
-		return l, l.UnmarshalText([]byte(v.(string)))
+		case to == zapAtomicLevelType:
+			l := zap.NewAtomicLevel()
+			err := l.UnmarshalText([]byte(text))
+			return l, err
 
-	case to == zapAtomicLevelType:
-		var l zap.AtomicLevel
-		return l, l.UnmarshalText([]byte(v.(string)))
-
-	case to == zapAtomicLevelPtrType:
-		l := new(zap.AtomicLevel)
-		return l, l.UnmarshalText([]byte(v.(string)))
-
-	default:
-		return v, nil
+		case to == zapAtomicLevelPtrType:
+			l := zap.NewAtomicLevel()
+			err := l.UnmarshalText([]byte(text))
+			return &l, err
+		}
 	}
+
+	return src, nil
 }
