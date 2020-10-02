@@ -12,10 +12,10 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func testStringToLevelHookNoConversion(t *testing.T) {
+func testDecodeHookNotAString(t *testing.T) {
 	var (
 		assert      = assert.New(t)
-		result, err = StringToLevelHook(
+		result, err = DecodeHook(
 			reflect.TypeOf(int(0)),
 			reflect.TypeOf(""),
 			123,
@@ -26,13 +26,27 @@ func testStringToLevelHookNoConversion(t *testing.T) {
 	assert.NoError(err)
 }
 
-func testStringToLevelHookToZapcoreLevel(t *testing.T) {
+func testDecodeHookUnsupported(t *testing.T) {
+	var (
+		assert      = assert.New(t)
+		result, err = DecodeHook(
+			reflect.TypeOf(""),
+			reflect.TypeOf(float64(8.9)),
+			"test",
+		)
+	)
+
+	assert.Equal("test", result)
+	assert.NoError(err)
+}
+
+func testDecodeHookToLevel(t *testing.T) {
 	var (
 		assert   = assert.New(t)
 		expected = zapcore.DebugLevel
 	)
 
-	result, err := StringToLevelHook(
+	result, err := DecodeHook(
 		reflect.TypeOf(""),
 		reflect.TypeOf(zapcore.Level(0)),
 		"debug",
@@ -41,7 +55,7 @@ func testStringToLevelHookToZapcoreLevel(t *testing.T) {
 	assert.Equal(expected, result)
 	assert.NoError(err)
 
-	result, err = StringToLevelHook(
+	result, err = DecodeHook(
 		reflect.TypeOf(""),
 		reflect.TypeOf(new(zapcore.Level)),
 		"debug",
@@ -51,13 +65,13 @@ func testStringToLevelHookToZapcoreLevel(t *testing.T) {
 	assert.NoError(err)
 }
 
-func testStringToLevelHookToZapAtomicLevel(t *testing.T) {
+func testDecodeHookToAtomicLevel(t *testing.T) {
 	var (
 		assert   = assert.New(t)
 		expected = zap.NewAtomicLevelAt(zapcore.DebugLevel)
 	)
 
-	result, err := StringToLevelHook(
+	result, err := DecodeHook(
 		reflect.TypeOf(""),
 		reflect.TypeOf(zap.AtomicLevel{}),
 		"debug",
@@ -66,7 +80,7 @@ func testStringToLevelHookToZapAtomicLevel(t *testing.T) {
 	assert.Equal(expected, result)
 	assert.NoError(err)
 
-	result, err = StringToLevelHook(
+	result, err = DecodeHook(
 		reflect.TypeOf(""),
 		reflect.TypeOf(new(zap.AtomicLevel)),
 		"debug",
@@ -76,31 +90,11 @@ func testStringToLevelHookToZapAtomicLevel(t *testing.T) {
 	assert.NoError(err)
 }
 
-func TestStringToLevelHook(t *testing.T) {
-	t.Run("NoConversion", testStringToLevelHookNoConversion)
-	t.Run("ToZapcoreLevel", testStringToLevelHookToZapcoreLevel)
-	t.Run("ToZapAtomicLevel", testStringToLevelHookToZapAtomicLevel)
-}
-
-func testStringToLevelEncoderHookNoConversion(t *testing.T) {
-	var (
-		assert      = assert.New(t)
-		result, err = StringToLevelEncoderHook(
-			reflect.TypeOf(int(0)),
-			reflect.TypeOf(""),
-			123,
-		)
-	)
-
-	assert.Equal(123, result)
-	assert.NoError(err)
-}
-
-func testStringToLevelEncoderHookSuccess(t *testing.T) {
+func testDecodeHookToLevelEncoder(t *testing.T) {
 	var (
 		assert      = assert.New(t)
 		require     = require.New(t)
-		result, err = StringToLevelEncoderHook(
+		result, err = DecodeHook(
 			reflect.TypeOf(""),
 			reflect.TypeOf(zapcore.LevelEncoder(nil)),
 			"capital",
@@ -129,31 +123,12 @@ func testStringToLevelEncoderHookSuccess(t *testing.T) {
 	assert.Contains(output.String(), "INFO")
 }
 
-func TestStringToLevelEncoderHook(t *testing.T) {
-	t.Run("NoConversion", testStringToLevelEncoderHookNoConversion)
-	t.Run("Success", testStringToLevelEncoderHookSuccess)
-}
-
-func testStringToTimeEncoderHookNoConversion(t *testing.T) {
-	var (
-		assert      = assert.New(t)
-		result, err = StringToTimeEncoderHook(
-			reflect.TypeOf(int(0)),
-			reflect.TypeOf(""),
-			123,
-		)
-	)
-
-	assert.Equal(123, result)
-	assert.NoError(err)
-}
-
-func testStringToTimeEncoderHookSuccess(t *testing.T) {
+func testDecodeHookToTimeEncoder(t *testing.T) {
 	var (
 		assert      = assert.New(t)
 		require     = require.New(t)
 		now         = time.Now()
-		result, err = StringToTimeEncoderHook(
+		result, err = DecodeHook(
 			reflect.TypeOf(""),
 			reflect.TypeOf(zapcore.TimeEncoder(nil)),
 			"RFC3339",
@@ -182,30 +157,11 @@ func testStringToTimeEncoderHookSuccess(t *testing.T) {
 	assert.Contains(output.String(), now.Format(time.RFC3339))
 }
 
-func TestStringToTimeEncoderHook(t *testing.T) {
-	t.Run("NoConversion", testStringToTimeEncoderHookNoConversion)
-	t.Run("Success", testStringToTimeEncoderHookSuccess)
-}
-
-func testStringToDurationEncoderHookNoConversion(t *testing.T) {
-	var (
-		assert      = assert.New(t)
-		result, err = StringToDurationEncoderHook(
-			reflect.TypeOf(int(0)),
-			reflect.TypeOf(""),
-			123,
-		)
-	)
-
-	assert.Equal(123, result)
-	assert.NoError(err)
-}
-
-func testStringToDurationEncoderHookSuccess(t *testing.T) {
+func testDecodeHookToDurationEncoder(t *testing.T) {
 	var (
 		assert      = assert.New(t)
 		require     = require.New(t)
-		result, err = StringToDurationEncoderHook(
+		result, err = DecodeHook(
 			reflect.TypeOf(""),
 			reflect.TypeOf(zapcore.DurationEncoder(nil)),
 			"string",
@@ -237,30 +193,11 @@ func testStringToDurationEncoderHookSuccess(t *testing.T) {
 	assert.Contains(output.String(), "17m")
 }
 
-func TestStringToDurationEncoderHook(t *testing.T) {
-	t.Run("NoConversion", testStringToDurationEncoderHookNoConversion)
-	t.Run("Success", testStringToDurationEncoderHookSuccess)
-}
-
-func testStringToCallerEncoderHookNoConversion(t *testing.T) {
-	var (
-		assert      = assert.New(t)
-		result, err = StringToCallerEncoderHook(
-			reflect.TypeOf(int(0)),
-			reflect.TypeOf(""),
-			123,
-		)
-	)
-
-	assert.Equal(123, result)
-	assert.NoError(err)
-}
-
-func testStringToCallerEncoderHookSuccess(t *testing.T) {
+func testDecodeHookToCallerEncoder(t *testing.T) {
 	var (
 		assert      = assert.New(t)
 		require     = require.New(t)
-		result, err = StringToCallerEncoderHook(
+		result, err = DecodeHook(
 			reflect.TypeOf(""),
 			reflect.TypeOf(zapcore.CallerEncoder(nil)),
 			"short",
@@ -293,30 +230,11 @@ func testStringToCallerEncoderHookSuccess(t *testing.T) {
 	assert.Contains(output.String(), "foo/bar.go:123")
 }
 
-func TestStringToCallerEncoderHook(t *testing.T) {
-	t.Run("NoConversion", testStringToCallerEncoderHookNoConversion)
-	t.Run("Success", testStringToCallerEncoderHookSuccess)
-}
-
-func testStringToNameEncoderHookNoConversion(t *testing.T) {
-	var (
-		assert      = assert.New(t)
-		result, err = StringToNameEncoderHook(
-			reflect.TypeOf(int(0)),
-			reflect.TypeOf(""),
-			123,
-		)
-	)
-
-	assert.Equal(123, result)
-	assert.NoError(err)
-}
-
-func testStringToNameEncoderHookSuccess(t *testing.T) {
+func testDecodeHookToNameEncoder(t *testing.T) {
 	var (
 		assert      = assert.New(t)
 		require     = require.New(t)
-		result, err = StringToNameEncoderHook(
+		result, err = DecodeHook(
 			reflect.TypeOf(""),
 			reflect.TypeOf(zapcore.NameEncoder(nil)),
 			"full",
@@ -345,7 +263,14 @@ func testStringToNameEncoderHookSuccess(t *testing.T) {
 	assert.Contains(output.String(), "foo.bar")
 }
 
-func TestStringToNameEncoderHook(t *testing.T) {
-	t.Run("NoConversion", testStringToNameEncoderHookNoConversion)
-	t.Run("Success", testStringToNameEncoderHookSuccess)
+func TestDecodeHook(t *testing.T) {
+	t.Run("NotAString", testDecodeHookNotAString)
+	t.Run("Unsupported", testDecodeHookUnsupported)
+	t.Run("ToLevel", testDecodeHookToLevel)
+	t.Run("ToAtomicLevel", testDecodeHookToAtomicLevel)
+	t.Run("ToLevelEncoder", testDecodeHookToLevelEncoder)
+	t.Run("ToTimeEncoder", testDecodeHookToTimeEncoder)
+	t.Run("ToDurationEncoder", testDecodeHookToDurationEncoder)
+	t.Run("ToCallerEncoder", testDecodeHookToCallerEncoder)
+	t.Run("ToNameEncoder", testDecodeHookToNameEncoder)
 }

@@ -7,137 +7,95 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var stringType = reflect.TypeOf("")
-
 var (
-	zapcoreLevelType      = reflect.TypeOf(zapcore.Level(0))
-	zapcoreLevelPtrType   = reflect.PtrTo(zapcoreLevelType)
-	zapAtomicLevelType    = reflect.TypeOf(zap.AtomicLevel{})
-	zapAtomicLevelPtrType = reflect.PtrTo(zapAtomicLevelType)
+	stringType = reflect.TypeOf("")
+
+	levelType          = reflect.TypeOf(zapcore.Level(0))
+	levelPtrType       = reflect.PtrTo(levelType)
+	atomicLevelType    = reflect.TypeOf(zap.AtomicLevel{})
+	atomicLevelPtrType = reflect.PtrTo(atomicLevelType)
+
+	levelEncoderType    = reflect.TypeOf(zapcore.LevelEncoder(nil))
+	timeEncoderType     = reflect.TypeOf(zapcore.TimeEncoder(nil))
+	durationEncoderType = reflect.TypeOf(zapcore.DurationEncoder(nil))
+	callerEncoderType   = reflect.TypeOf(zapcore.CallerEncoder(nil))
+	nameEncoderType     = reflect.TypeOf(zapcore.NameEncoder(nil))
 )
 
-// StringToLevelHook is a mapstructure DecodeHookFuncType implementation
-// that handles converting from a string to a zap logging level.  This function will
-// convert to any of the following types, based on the to parameter:
+// DecodeHook is an all-in-one mapstructure DecodeHookFunc that converts from
+// a string (typically unmarshaled in something like spf13/viper) into the appropriate
+// configuration field required by zapcore.
+//
+// The from type must refer exactly to a string, not to a type derived from string.
+//
+// The to type may be one of:
 //
 //   zapcore.Level
 //   *zapcore.Level
 //   zap.AtomicLevel
 //   *zap.AtomicLevel
+//   zapcore.LevelEncoder
+//   zapcore.TimeEncoder
+//   zapcore.DurationEncoder
+//   zapcore.CallerEncoder
+//   zapcore.NameEncoder
 //
-// To use this with spf13/viper, create a viper.DecoderConfigOption and apply it:
+// The UnmarshalText method of the to type is used to do the conversion.
 //
-//   v := viper.New()
-//   v.Unmarshal(&myType, func(cfg *mapstructure.DecoderConfig) {
-//     if cfg.DecodeHook != nil {
-//       cfg.DecodeHook = mapstructure.ComposeDecodeHookFunc(
-//         cfg.DecodeHook,
-//         StringToLevelHookFunc,
-//       )
-//     } else {
-//       cfg.DecodeHook = StringToLevelHookFunc
-//     }
-//   })
-//
-// The UnmarshalText implementation of both level types is used to perform the conversion.
-//
-// This function is necessary because libraries like spf13/viper do not directly unmarshal
-// into types.  Rather, they unmarshal first to a neutral format, e.g. map[string]interface{},
-// and then use mapstructure to take that format and convert it into a struct.
-func StringToLevelHook(from, to reflect.Type, src interface{}) (interface{}, error) {
-	if from == stringType {
-		switch to {
-		case zapcoreLevelType:
-			var l zapcore.Level
-			err := l.UnmarshalText([]byte(src.(string)))
-			return l, err
-
-		case zapcoreLevelPtrType:
-			l := new(zapcore.Level)
-			err := l.UnmarshalText([]byte(src.(string)))
-			return l, err
-
-		case zapAtomicLevelType:
-			l := zap.NewAtomicLevel()
-			err := l.UnmarshalText([]byte(src.(string)))
-			return l, err
-
-		case zapAtomicLevelPtrType:
-			l := zap.NewAtomicLevel()
-			err := l.UnmarshalText([]byte(src.(string)))
-			return &l, err
-		}
+// Any other from or to type will cause the function to do no conversion and
+// return the src as is with no error.
+func DecodeHook(from, to reflect.Type, src interface{}) (interface{}, error) {
+	if from != stringType {
+		return src, nil
 	}
 
-	return src, nil
-}
+	switch to {
+	case levelType:
+		var l zapcore.Level
+		err := l.UnmarshalText([]byte(src.(string)))
+		return l, err
 
-var levelEncoderType = reflect.TypeOf(zapcore.LevelEncoder(nil))
+	case levelPtrType:
+		l := new(zapcore.Level)
+		err := l.UnmarshalText([]byte(src.(string)))
+		return l, err
 
-// StringToLevelEncoderHook is a mapstructure DecodeHookFuncType that converts from a string
-// to a zapcore.LevelEncoder via the zapcore.LevelEncoder.UnmarshalText method.
-func StringToLevelEncoderHook(from, to reflect.Type, src interface{}) (interface{}, error) {
-	if from == stringType && to == levelEncoderType {
+	case atomicLevelType:
+		l := zap.NewAtomicLevel()
+		err := l.UnmarshalText([]byte(src.(string)))
+		return l, err
+
+	case atomicLevelPtrType:
+		l := zap.NewAtomicLevel()
+		err := l.UnmarshalText([]byte(src.(string)))
+		return &l, err
+
+	case levelEncoderType:
 		var le zapcore.LevelEncoder
 		err := le.UnmarshalText([]byte(src.(string)))
 		return le, err
-	}
 
-	return src, nil
-}
-
-var timeEncoderType = reflect.TypeOf(zapcore.TimeEncoder(nil))
-
-// StringToTimeEncoderHook is a mapstructure DecodeHookFuncType that converts from a string
-// to a zapcore.TimeEncoder via the zapcore.TimeEncoder.UnmarshalText method.
-func StringToTimeEncoderHook(from, to reflect.Type, src interface{}) (interface{}, error) {
-	if from == stringType && to == timeEncoderType {
+	case timeEncoderType:
 		var te zapcore.TimeEncoder
 		err := te.UnmarshalText([]byte(src.(string)))
 		return te, err
-	}
 
-	return src, nil
-}
-
-var durationEncoderType = reflect.TypeOf(zapcore.DurationEncoder(nil))
-
-// StringToDurationEncoderHook is a mapstructure DecodeHookFuncType that converts from a string
-// to a zapcore.DurationEncoder via the zapcore.DurationEncoder.UnmarshalText method.
-func StringToDurationEncoderHook(from, to reflect.Type, src interface{}) (interface{}, error) {
-	if from == stringType && to == durationEncoderType {
+	case durationEncoderType:
 		var de zapcore.DurationEncoder
 		err := de.UnmarshalText([]byte(src.(string)))
 		return de, err
-	}
 
-	return src, nil
-}
-
-var callerEncoderType = reflect.TypeOf(zapcore.CallerEncoder(nil))
-
-// StringToCallerEncoderHook is a mapstructure DecodeHookFuncType that converts from a string
-// to a zapcore.CallerEncoder via the zapcore.CallerEncoder.UnmarshalText method.
-func StringToCallerEncoderHook(from, to reflect.Type, src interface{}) (interface{}, error) {
-	if from == stringType && to == callerEncoderType {
+	case callerEncoderType:
 		var ce zapcore.CallerEncoder
 		err := ce.UnmarshalText([]byte(src.(string)))
 		return ce, err
-	}
 
-	return src, nil
-}
-
-var nameEncoderType = reflect.TypeOf(zapcore.NameEncoder(nil))
-
-// StringToNameEncoderHook is a mapstructure DecodeHookFuncType that converts from a string
-// to a zapcore.NameEncoder via the zapcore.NameEncoder.UnmarshalText method.
-func StringToNameEncoderHook(from, to reflect.Type, src interface{}) (interface{}, error) {
-	if from == stringType && to == nameEncoderType {
+	case nameEncoderType:
 		var ne zapcore.NameEncoder
 		err := ne.UnmarshalText([]byte(src.(string)))
 		return ne, err
-	}
 
-	return src, nil
+	default:
+		return src, nil
+	}
 }
