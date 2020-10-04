@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Sane defaults for fields in zap.Config and zap.EncoderConfig
 
 ## [v0.1.2]
 - Added a mapstructure DecodeHook for zap and zapcore types used in configuration
