@@ -4,13 +4,14 @@ import (
 	"os"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 // Config describes the set of options for building a single zap.Logger.  Most of these
 // fields are exactly the same as zap.Config.  Use of this type is optional.  It simply provides
 // easier configuration for certain features like log rotation.
 //
-// An Options instance is converted to a zap.Config by applying certain features,
+// A Config instance is converted to a zap.Config by applying certain features,
 // such as log rotation.  Ultimately, zap.Config.Build is used to actually construct
 // the logger.
 //
@@ -57,13 +58,46 @@ func (c Config) NewZapConfig() (zc zap.Config, err error) {
 	}
 
 	if err == nil {
-		// difference from zap:  we let this be unset, and default it to ErrorLevel
+		// apply certain defaults.  zap will error out if most of these are unset,
+		// but we want to add sane defaults rather than require someone to configure
+		// every field.
 		if zc.Level == (zap.AtomicLevel{}) {
 			zc.Level = zap.NewAtomicLevelAt(zap.ErrorLevel)
 		}
 
 		if len(zc.Encoding) == 0 {
 			zc.Encoding = "json"
+		}
+
+		if len(zc.OutputPaths) == 0 {
+			// NOTE: difference from zap ... in development they send output to stderr
+			zc.OutputPaths = []string{"stdout"}
+		}
+
+		if len(zc.ErrorOutputPaths) == 0 {
+			zc.ErrorOutputPaths = []string{"stderr"}
+		}
+
+		if zc.EncoderConfig.EncodeLevel == nil {
+			zc.EncoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+		}
+
+		if zc.EncoderConfig.EncodeTime == nil {
+			zc.EncoderConfig.EncodeTime = zapcore.RFC3339TimeEncoder
+		}
+
+		if zc.EncoderConfig.EncodeDuration == nil {
+			zc.EncoderConfig.EncodeDuration = zapcore.NanosDurationEncoder
+		}
+
+		if zc.EncoderConfig.EncodeCaller == nil {
+			zc.EncoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
+		}
+
+		if zc.EncoderConfig.EncodeName == nil {
+			// technically, we don't need to do this as zap will fall back to FullNameEncoder.
+			// but, this keeps this field consistent with the other EncodeXXX fields
+			zc.EncoderConfig.EncodeName = zapcore.FullNameEncoder
 		}
 	}
 

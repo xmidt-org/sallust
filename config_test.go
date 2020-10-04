@@ -18,15 +18,48 @@ func testConfigNewZapConfigSuccess(t *testing.T) {
 		expected zap.Config
 	}{
 		{
+			config: Config{},
+			expected: zap.Config{
+				Level:            zap.NewAtomicLevelAt(zapcore.ErrorLevel),
+				Encoding:         "json",
+				OutputPaths:      []string{"stdout"},
+				ErrorOutputPaths: []string{"stderr"},
+			},
+		},
+		{
 			config: Config{
 				Config: zap.Config{
+					EncoderConfig: zapcore.EncoderConfig{
+						MessageKey:       "msg",
+						LevelKey:         "level",
+						TimeKey:          "ts",
+						NameKey:          "name",
+						CallerKey:        "caller",
+						FunctionKey:      "function",
+						StacktraceKey:    "trace",
+						LineEnding:       "--",
+						ConsoleSeparator: ".",
+					},
 					OutputPaths: []string{"/log.json"},
 				},
 			},
 			expected: zap.Config{
-				Level:       zap.NewAtomicLevelAt(zapcore.ErrorLevel),
-				Encoding:    "json",
-				OutputPaths: []string{"/log.json"},
+				Level:            zap.NewAtomicLevelAt(zapcore.ErrorLevel),
+				Encoding:         "json",
+				OutputPaths:      []string{"/log.json"},
+				ErrorOutputPaths: []string{"stderr"},
+				EncoderConfig: zapcore.EncoderConfig{
+					MessageKey:       "msg",
+					LevelKey:         "level",
+					TimeKey:          "ts",
+					NameKey:          "name",
+					CallerKey:        "caller",
+					FunctionKey:      "function",
+					StacktraceKey:    "trace",
+					LineEnding:       "--",
+					ConsoleSeparator: ".",
+					// function types omitted
+				},
 			},
 		},
 		{
@@ -39,9 +72,11 @@ func testConfigNewZapConfigSuccess(t *testing.T) {
 				},
 			},
 			expected: zap.Config{
-				Level:       zap.NewAtomicLevelAt(zapcore.ErrorLevel),
-				Encoding:    "json",
-				OutputPaths: []string{"lumberjack:///log.json?maxAge=10"},
+				Level:            zap.NewAtomicLevelAt(zapcore.ErrorLevel),
+				Encoding:         "json",
+				OutputPaths:      []string{"lumberjack:///log.json?maxAge=10"},
+				ErrorOutputPaths: []string{"stderr"},
+				// function types in EncoderConfig omitted
 			},
 		},
 		{
@@ -71,7 +106,7 @@ func testConfigNewZapConfigSuccess(t *testing.T) {
 				DisableStacktrace: true,
 				Sampling:          &zap.SamplingConfig{},
 				Encoding:          "console",
-				EncoderConfig:     zapcore.EncoderConfig{},
+				EncoderConfig:     zapcore.EncoderConfig{ /* function types omitted */ },
 				OutputPaths:       []string{"stdout", "lumberjack:///log.json?maxAge=10"},
 				ErrorOutputPaths:  []string{"stderr"},
 				InitialFields: map[string]interface{}{
@@ -96,10 +131,25 @@ func testConfigNewZapConfigSuccess(t *testing.T) {
 			assert.Equal(record.expected.DisableStacktrace, actual.DisableStacktrace)
 			assert.Equal(record.expected.Sampling, actual.Sampling)
 			assert.Equal(record.expected.Encoding, actual.Encoding)
-			assert.Equal(record.expected.EncoderConfig, actual.EncoderConfig)
 			assert.Equal(record.expected.OutputPaths, actual.OutputPaths)
 			assert.Equal(record.expected.ErrorOutputPaths, actual.ErrorOutputPaths)
 			assert.Equal(record.expected.InitialFields, actual.InitialFields)
+
+			assert.Equal(record.expected.EncoderConfig.MessageKey, actual.EncoderConfig.MessageKey)
+			assert.Equal(record.expected.EncoderConfig.LevelKey, actual.EncoderConfig.LevelKey)
+			assert.Equal(record.expected.EncoderConfig.TimeKey, actual.EncoderConfig.TimeKey)
+			assert.Equal(record.expected.EncoderConfig.NameKey, actual.EncoderConfig.NameKey)
+			assert.Equal(record.expected.EncoderConfig.CallerKey, actual.EncoderConfig.CallerKey)
+			assert.Equal(record.expected.EncoderConfig.FunctionKey, actual.EncoderConfig.FunctionKey)
+			assert.Equal(record.expected.EncoderConfig.StacktraceKey, actual.EncoderConfig.StacktraceKey)
+			assert.Equal(record.expected.EncoderConfig.LineEnding, actual.EncoderConfig.LineEnding)
+			assert.Equal(record.expected.EncoderConfig.ConsoleSeparator, actual.EncoderConfig.ConsoleSeparator)
+
+			assert.NotNil(actual.EncoderConfig.EncodeLevel)
+			assert.NotNil(actual.EncoderConfig.EncodeTime)
+			assert.NotNil(actual.EncoderConfig.EncodeDuration)
+			assert.NotNil(actual.EncoderConfig.EncodeCaller)
+			assert.NotNil(actual.EncoderConfig.EncodeName)
 		})
 	}
 }
