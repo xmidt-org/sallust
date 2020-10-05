@@ -184,7 +184,31 @@ func testConfigNewZapConfigBadErrorOutputPath(t *testing.T) {
 	assert.Error(err)
 }
 
-func testConfigNewLoggerSuccess(t *testing.T) {
+func testConfigBuildDefaultedEncoders(t *testing.T) {
+	var (
+		assert = assert.New(t)
+		config = Config{
+			Config: zap.Config{
+				EncoderConfig: zapcore.EncoderConfig{
+					// set all the keys to force zapcore's logic to run
+					MessageKey:    "1",
+					LevelKey:      "2",
+					TimeKey:       "3",
+					NameKey:       "4",
+					CallerKey:     "5",
+					FunctionKey:   "6",
+					StacktraceKey: "7",
+				},
+			},
+		}
+	)
+
+	l, err := config.Build()
+	assert.NotNil(l)
+	assert.NoError(err)
+}
+
+func testConfigBuildSuccess(t *testing.T) {
 	var (
 		assert = assert.New(t)
 		file   = filepath.Join(os.TempDir(), "sallust-test.json")
@@ -199,12 +223,12 @@ func testConfigNewLoggerSuccess(t *testing.T) {
 	)
 
 	defer os.Remove(file)
-	l, err := config.NewLogger()
+	l, err := config.Build()
 	assert.NoError(err)
 	assert.NotNil(l)
 }
 
-func testConfigNewLoggerBadOutputPath(t *testing.T) {
+func testConfigBuildBadOutputPath(t *testing.T) {
 	var (
 		assert = assert.New(t)
 		file   = filepath.Join(os.TempDir(), "#^@*&^$*%XX")
@@ -219,9 +243,12 @@ func testConfigNewLoggerBadOutputPath(t *testing.T) {
 	)
 
 	defer os.Remove(file)
-	l, err := config.NewLogger()
+	l, err := config.Build()
 	assert.Error(err)
 	assert.Nil(l)
+}
+
+func testConfigBuild(t *testing.T) {
 }
 
 func TestConfig(t *testing.T) {
@@ -231,8 +258,9 @@ func TestConfig(t *testing.T) {
 		t.Run("BadErrorOutputPath", testConfigNewZapConfigBadErrorOutputPath)
 	})
 
-	t.Run("NewLogger", func(t *testing.T) {
-		t.Run("Success", testConfigNewLoggerSuccess)
-		t.Run("BadOutputPath", testConfigNewLoggerBadOutputPath)
+	t.Run("Build", func(t *testing.T) {
+		t.Run("Success", testConfigBuildSuccess)
+		t.Run("BadOutputPath", testConfigBuildBadOutputPath)
+		t.Run("DefauledEncoders", testConfigBuildDefaultedEncoders)
 	})
 }
