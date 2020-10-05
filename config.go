@@ -38,6 +38,9 @@ type Config struct {
 // NewZapConfig creates a zap.Config enriched with features from these Options.
 // Primarily, this involves creating lumberjack URLs so that the registered sink
 // will create the appropriate infrastructure to do log file rotation.
+//
+// This method sets sane defaults for the zapcore.EncoderConfig values.  Unlike zap itself,
+// leaving the various EncodeXXX fields unset will not raise an error.
 func (c Config) NewZapConfig() (zc zap.Config, err error) {
 	zc = c.Config
 
@@ -104,9 +107,9 @@ func (c Config) NewZapConfig() (zc zap.Config, err error) {
 	return
 }
 
-// NewLogger behaves similarly to zap.Config.Build.  It uses the configuration created
+// Build behaves similarly to zap.Config.Build.  It uses the configuration created
 // by NewZapConfig to build the root logger.
-func (c Config) NewLogger(opts ...zap.Option) (*zap.Logger, error) {
+func (c Config) Build(opts ...zap.Option) (*zap.Logger, error) {
 	zapConfig, err := c.NewZapConfig()
 	if err != nil {
 		return nil, err
