@@ -33,22 +33,18 @@ func With(parent context.Context, logger *zap.Logger) context.Context {
 	return parent
 }
 
-// Get returns the zap.Logger from the given context.  If no zap.Logger
-// exists, this function returns Default().
+// Get returns the zap.Logger from the given context.  This function
+// never returns nil.  If no zap.Logger exists, this function returns Default().
 //
 // See: https://pkg.go.dev/go.uber.org/zap?tab=doc#Logger
 // See: https://pkg.go.dev/go.uber.org/zap?tab=doc#NewNop
 func Get(ctx context.Context) *zap.Logger {
-	if l, ok := ctx.Value(contextKey{}).(*zap.Logger); ok {
-		return l
-	}
-
-	return Default()
+	return GetDefault(ctx, nil)
 }
 
-// GetDefault attempts to find a zap.Logger in the given context.  If none is
-// found, the given default is returned.  If the given default is nil, then
-// Default() is returned instead.
+// GetDefault returns the logger associated with the given context.  This function
+// never returns nil.  If no logger is found in the context, the given default is
+// returned.  If the given default is nil, Default() is returned.
 //
 // See: https://pkg.go.dev/go.uber.org/zap?tab=doc#Logger
 func GetDefault(ctx context.Context, def *zap.Logger) *zap.Logger {
