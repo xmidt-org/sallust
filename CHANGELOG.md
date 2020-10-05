@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 - Sane defaults for fields in zap.Config and zap.EncoderConfig
+- Rename NewLogger to Build to properly override zap's behavior
 
 ## [v0.1.2]
 - Added a mapstructure DecodeHook for zap and zapcore types used in configuration
