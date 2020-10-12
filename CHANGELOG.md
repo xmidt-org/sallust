@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- sonar integration
 
 ## [v0.1.3]
 - Sane defaults for fields in zap.Config and zap.EncoderConfig
