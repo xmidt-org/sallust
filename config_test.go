@@ -28,20 +28,18 @@ func testConfigNewZapConfigSuccess(t *testing.T) {
 		},
 		{
 			config: Config{
-				Config: zap.Config{
-					EncoderConfig: zapcore.EncoderConfig{
-						MessageKey:       "msg",
-						LevelKey:         "level",
-						TimeKey:          "ts",
-						NameKey:          "name",
-						CallerKey:        "caller",
-						FunctionKey:      "function",
-						StacktraceKey:    "trace",
-						LineEnding:       "--",
-						ConsoleSeparator: ".",
-					},
-					OutputPaths: []string{"/log.json"},
+				EncoderConfig: EncoderConfig{
+					MessageKey:       "msg",
+					LevelKey:         "level",
+					TimeKey:          "ts",
+					NameKey:          "name",
+					CallerKey:        "caller",
+					FunctionKey:      "function",
+					StacktraceKey:    "trace",
+					LineEnding:       "--",
+					ConsoleSeparator: ".",
 				},
+				OutputPaths: []string{"/log.json"},
 			},
 			expected: zap.Config{
 				Level:            zap.NewAtomicLevelAt(zapcore.ErrorLevel),
@@ -64,9 +62,7 @@ func testConfigNewZapConfigSuccess(t *testing.T) {
 		},
 		{
 			config: Config{
-				Config: zap.Config{
-					OutputPaths: []string{"/log.json"},
-				},
+				OutputPaths: []string{"/log.json"},
 				Rotation: &Rotation{
 					MaxAge: 10,
 				},
@@ -81,19 +77,17 @@ func testConfigNewZapConfigSuccess(t *testing.T) {
 		},
 		{
 			config: Config{
-				Config: zap.Config{
-					Level:             zap.NewAtomicLevelAt(zapcore.DebugLevel),
-					Development:       true,
-					DisableCaller:     true,
-					DisableStacktrace: true,
-					Sampling:          &zap.SamplingConfig{},
-					Encoding:          "console",
-					EncoderConfig:     zapcore.EncoderConfig{},
-					OutputPaths:       []string{"stdout", "file:///log.json"},
-					ErrorOutputPaths:  []string{"stderr"},
-					InitialFields: map[string]interface{}{
-						"foo": "bar",
-					},
+				Level:             "debug",
+				Development:       true,
+				DisableCaller:     true,
+				DisableStacktrace: true,
+				Sampling:          &zap.SamplingConfig{},
+				Encoding:          "console",
+				EncoderConfig:     EncoderConfig{},
+				OutputPaths:       []string{"stdout", "file:///log.json"},
+				ErrorOutputPaths:  []string{"stderr"},
+				InitialFields: map[string]interface{}{
+					"foo": "bar",
 				},
 				Rotation: &Rotation{
 					MaxAge: 10,
@@ -158,10 +152,8 @@ func testConfigNewZapConfigBadOutputPath(t *testing.T) {
 	var (
 		assert = assert.New(t)
 		config = Config{
-			Rotation: new(Rotation),
-			Config: zap.Config{
-				OutputPaths: []string{"#%@(&%(@%XX"},
-			},
+			Rotation:    new(Rotation),
+			OutputPaths: []string{"#%@(&%(@%XX"},
 		}
 	)
 
@@ -173,10 +165,8 @@ func testConfigNewZapConfigBadErrorOutputPath(t *testing.T) {
 	var (
 		assert = assert.New(t)
 		config = Config{
-			Rotation: new(Rotation),
-			Config: zap.Config{
-				ErrorOutputPaths: []string{"#%@(&%(@%XX"},
-			},
+			Rotation:         new(Rotation),
+			ErrorOutputPaths: []string{"#%@(&%(@%XX"},
 		}
 	)
 
@@ -188,17 +178,15 @@ func testConfigBuildDefaultedEncoders(t *testing.T) {
 	var (
 		assert = assert.New(t)
 		config = Config{
-			Config: zap.Config{
-				EncoderConfig: zapcore.EncoderConfig{
-					// set all the keys to force zapcore's logic to run
-					MessageKey:    "1",
-					LevelKey:      "2",
-					TimeKey:       "3",
-					NameKey:       "4",
-					CallerKey:     "5",
-					FunctionKey:   "6",
-					StacktraceKey: "7",
-				},
+			EncoderConfig: EncoderConfig{
+				// set all the keys to force zapcore's logic to run
+				MessageKey:    "1",
+				LevelKey:      "2",
+				TimeKey:       "3",
+				NameKey:       "4",
+				CallerKey:     "5",
+				FunctionKey:   "6",
+				StacktraceKey: "7",
 			},
 		}
 	)
@@ -216,9 +204,7 @@ func testConfigBuildSuccess(t *testing.T) {
 			Rotation: &Rotation{
 				MaxSize: 100,
 			},
-			Config: zap.Config{
-				OutputPaths: []string{file},
-			},
+			OutputPaths: []string{file},
 		}
 	)
 
@@ -236,9 +222,7 @@ func testConfigBuildBadOutputPath(t *testing.T) {
 			Rotation: &Rotation{
 				MaxSize: 100,
 			},
-			Config: zap.Config{
-				OutputPaths: []string{file},
-			},
+			OutputPaths: []string{file},
 		}
 	)
 
@@ -246,9 +230,6 @@ func testConfigBuildBadOutputPath(t *testing.T) {
 	l, err := config.Build()
 	assert.Error(err)
 	assert.Nil(l)
-}
-
-func testConfigBuild(t *testing.T) {
 }
 
 func TestConfig(t *testing.T) {
