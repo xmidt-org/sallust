@@ -1,9 +1,6 @@
 package sallust
 
 import (
-	"os"
-	"path/filepath"
-	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,255 +9,261 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func testConfigNewZapConfigSuccess(t *testing.T) {
-	testData := []struct {
-		config   Config
-		expected zap.Config
-	}{
-		{
-			config: Config{},
-			expected: zap.Config{
-				Level:            zap.NewAtomicLevelAt(zapcore.ErrorLevel),
-				Encoding:         "json",
-				OutputPaths:      []string{"stdout"},
-				ErrorOutputPaths: []string{"stderr"},
-			},
-		},
-		{
-			config: Config{
-				Config: zap.Config{
-					EncoderConfig: zapcore.EncoderConfig{
-						MessageKey:       "msg",
-						LevelKey:         "level",
-						TimeKey:          "ts",
-						NameKey:          "name",
-						CallerKey:        "caller",
-						FunctionKey:      "function",
-						StacktraceKey:    "trace",
-						LineEnding:       "--",
-						ConsoleSeparator: ".",
-					},
-					OutputPaths: []string{"/log.json"},
-				},
-			},
-			expected: zap.Config{
-				Level:            zap.NewAtomicLevelAt(zapcore.ErrorLevel),
-				Encoding:         "json",
-				OutputPaths:      []string{"/log.json"},
-				ErrorOutputPaths: []string{"stderr"},
-				EncoderConfig: zapcore.EncoderConfig{
-					MessageKey:       "msg",
-					LevelKey:         "level",
-					TimeKey:          "ts",
-					NameKey:          "name",
-					CallerKey:        "caller",
-					FunctionKey:      "function",
-					StacktraceKey:    "trace",
-					LineEnding:       "--",
-					ConsoleSeparator: ".",
-					// function types omitted
-				},
-			},
-		},
-		{
-			config: Config{
-				Config: zap.Config{
-					OutputPaths: []string{"/log.json"},
-				},
-				Rotation: &Rotation{
-					MaxAge: 10,
-				},
-			},
-			expected: zap.Config{
-				Level:            zap.NewAtomicLevelAt(zapcore.ErrorLevel),
-				Encoding:         "json",
-				OutputPaths:      []string{"lumberjack:///log.json?maxAge=10"},
-				ErrorOutputPaths: []string{"stderr"},
-				// function types in EncoderConfig omitted
-			},
-		},
-		{
-			config: Config{
-				Config: zap.Config{
-					Level:             zap.NewAtomicLevelAt(zapcore.DebugLevel),
-					Development:       true,
-					DisableCaller:     true,
-					DisableStacktrace: true,
-					Sampling:          &zap.SamplingConfig{},
-					Encoding:          "console",
-					EncoderConfig:     zapcore.EncoderConfig{},
-					OutputPaths:       []string{"stdout", "file:///log.json"},
-					ErrorOutputPaths:  []string{"stderr"},
-					InitialFields: map[string]interface{}{
-						"foo": "bar",
-					},
-				},
-				Rotation: &Rotation{
-					MaxAge: 10,
-				},
-			},
-			expected: zap.Config{
-				Level:             zap.NewAtomicLevelAt(zapcore.DebugLevel),
-				Development:       true,
-				DisableCaller:     true,
-				DisableStacktrace: true,
-				Sampling:          &zap.SamplingConfig{},
-				Encoding:          "console",
-				EncoderConfig:     zapcore.EncoderConfig{ /* function types omitted */ },
-				OutputPaths:       []string{"stdout", "lumberjack:///log.json?maxAge=10"},
-				ErrorOutputPaths:  []string{"stderr"},
-				InitialFields: map[string]interface{}{
-					"foo": "bar",
-				},
-			},
-		},
-	}
+func assertZapcoreEncoderConfigDefaults(assert *assert.Assertions, zec zapcore.EncoderConfig) {
+	assert.Equal(DefaultMessageKey, zec.MessageKey)
+	assert.Equal(DefaultLevelKey, zec.LevelKey)
+	assert.Equal(DefaultTimeKey, zec.TimeKey)
+	assert.Equal(DefaultNameKey, zec.NameKey)
+	assert.Empty(zec.CallerKey)
+	assert.Empty(zec.FunctionKey)
+	assert.Empty(zec.StacktraceKey)
+	assert.NotNil(zec.EncodeLevel)
+	assert.NotNil(zec.EncodeTime)
+	assert.NotNil(zec.EncodeDuration)
+	assert.NotNil(zec.EncodeCaller)
+	assert.NotNil(zec.EncodeName)
+}
 
-	for i, record := range testData {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			var (
-				assert      = assert.New(t)
-				require     = require.New(t)
-				actual, err = record.config.NewZapConfig()
+func testEncoderConfigDefaults(t *testing.T) {
+	var (
+		assert  = assert.New(t)
+		require = require.New(t)
+		ec      EncoderConfig
+	)
+
+	zec, err := ec.NewZapcoreEncoderConfig()
+	require.NoError(err)
+	assertZapcoreEncoderConfigDefaults(assert, zec)
+}
+
+func testEncoderConfigCustom(t *testing.T) {
+	var (
+		assert  = assert.New(t)
+		require = require.New(t)
+		ec      = EncoderConfig{
+			MessageKey:     "message_key",
+			LevelKey:       "level_key",
+			TimeKey:        "time_key",
+			NameKey:        "name_key",
+			CallerKey:      "caller_key",
+			FunctionKey:    "function_key",
+			StacktraceKey:  "stacktrace_key",
+			EncodeLevel:    "capital",
+			EncodeTime:     "iso8601",
+			EncodeDuration: "nanos",  // doesn't matter, zapcore will unmarshal anything but "string" to nanos
+			EncodeCaller:   "short",  // doesn't matter, zapcore will unmarshal anything but "full" to short
+			EncodeName:     "custom", // doesn't matter, zapcore unmarshals everything as full name
+
+			LineEnding:       "foo",
+			ConsoleSeparator: "bar",
+		}
+	)
+
+	zec, err := ec.NewZapcoreEncoderConfig()
+	require.NoError(err)
+
+	assert.Equal("message_key", zec.MessageKey)
+	assert.Equal("level_key", zec.LevelKey)
+	assert.Equal("time_key", zec.TimeKey)
+	assert.Equal("name_key", zec.NameKey)
+	assert.Equal("caller_key", zec.CallerKey)
+	assert.Equal("function_key", zec.FunctionKey)
+	assert.Equal("stacktrace_key", zec.StacktraceKey)
+	assert.NotNil(zec.EncodeLevel)
+	assert.NotNil(zec.EncodeTime)
+	assert.NotNil(zec.EncodeDuration)
+	assert.NotNil(zec.EncodeCaller)
+	assert.NotNil(zec.EncodeName)
+
+	assert.Equal("foo", zec.LineEnding)
+	assert.Equal("bar", zec.ConsoleSeparator)
+}
+
+func testEncoderConfigDisableDefaultKeys(t *testing.T) {
+	var (
+		assert  = assert.New(t)
+		require = require.New(t)
+		ec      = EncoderConfig{
+			DisableDefaultKeys: true,
+		}
+	)
+
+	zec, err := ec.NewZapcoreEncoderConfig()
+	require.NoError(err)
+
+	assert.Empty(zec.MessageKey)
+	assert.Empty(zec.LevelKey)
+	assert.Empty(zec.TimeKey)
+	assert.Empty(zec.NameKey)
+	assert.Empty(zec.CallerKey)
+	assert.Empty(zec.FunctionKey)
+	assert.Empty(zec.StacktraceKey)
+	assert.NotNil(zec.EncodeLevel)
+	assert.NotNil(zec.EncodeTime)
+	assert.NotNil(zec.EncodeDuration)
+	assert.NotNil(zec.EncodeCaller)
+	assert.NotNil(zec.EncodeName)
+}
+
+func TestEncoderConfig(t *testing.T) {
+	t.Run("Defaults", testEncoderConfigDefaults)
+	t.Run("Custom", testEncoderConfigCustom)
+	t.Run("DisableDefaultKeys", testEncoderConfigDisableDefaultKeys)
+}
+
+func testConfigNewZapConfigDefaults(t *testing.T) {
+	var (
+		assert  = assert.New(t)
+		require = require.New(t)
+
+		c Config
+	)
+
+	zc, err := c.NewZapConfig()
+	require.NoError(err)
+
+	assert.Equal(zapcore.InfoLevel, zc.Level.Level())
+	assert.False(zc.Development)
+	assert.False(zc.DisableCaller)
+	assert.False(zc.DisableStacktrace)
+	assert.Equal("json", zc.Encoding)
+	assert.Empty(zc.OutputPaths)
+	assert.Equal([]string{"stderr"}, zc.ErrorOutputPaths)
+	assert.Nil(zc.Sampling)
+	assert.Empty(zc.InitialFields)
+
+	zec, err := c.EncoderConfig.NewZapcoreEncoderConfig()
+	require.NoError(err)
+	assertZapcoreEncoderConfigDefaults(assert, zec)
+}
+
+func testConfigNewZapConfigCustom(t *testing.T) {
+	var (
+		assert  = assert.New(t)
+		require = require.New(t)
+
+		c = Config{
+			Level:             "debug",
+			Development:       true,
+			DisableCaller:     true,
+			DisableStacktrace: true,
+			Sampling: &zap.SamplingConfig{
+				Initial:    1,
+				Thereafter: 10,
+			},
+			Encoding:         "console",
+			OutputPaths:      []string{"/var/log/test/test.log"},
+			ErrorOutputPaths: []string{"stdout"},
+			InitialFields: map[string]interface{}{
+				"name":  "value",
+				"slice": []string{"1", "2"},
+			},
+		}
+	)
+
+	zc, err := c.NewZapConfig()
+	require.NoError(err)
+
+	assert.Equal(zapcore.DebugLevel, zc.Level.Level())
+	assert.True(zc.Development)
+	assert.True(zc.DisableCaller)
+	assert.True(zc.DisableStacktrace)
+	assert.Equal("console", zc.Encoding)
+	assert.Equal([]string{"/var/log/test/test.log"}, zc.OutputPaths)
+	assert.Equal([]string{"stdout"}, zc.ErrorOutputPaths)
+	assert.Equal(
+		zap.SamplingConfig{
+			Initial:    1,
+			Thereafter: 10,
+		},
+		*zc.Sampling,
+	)
+
+	assert.Equal(
+		map[string]interface{}{
+			"name":  "value",
+			"slice": []string{"1", "2"},
+		},
+		zc.InitialFields,
+	)
+
+	zec, err := c.EncoderConfig.NewZapcoreEncoderConfig()
+	require.NoError(err)
+	assertZapcoreEncoderConfigDefaults(assert, zec)
+}
+
+func testConfigNewZapConfigDevelopmentDefaults(t *testing.T) {
+	var (
+		assert  = assert.New(t)
+		require = require.New(t)
+
+		c = Config{
+			Development: true,
+		}
+	)
+
+	zc, err := c.NewZapConfig()
+	require.NoError(err)
+
+	assert.Equal(zapcore.InfoLevel, zc.Level.Level())
+	assert.True(zc.Development)
+	assert.False(zc.DisableCaller)
+	assert.False(zc.DisableStacktrace)
+	assert.Equal("json", zc.Encoding)
+	assert.Equal([]string{"stdout"}, zc.OutputPaths)
+	assert.Equal([]string{"stderr"}, zc.ErrorOutputPaths)
+	assert.Nil(zc.Sampling)
+	assert.Empty(zc.InitialFields)
+
+	zec, err := c.EncoderConfig.NewZapcoreEncoderConfig()
+	require.NoError(err)
+	assertZapcoreEncoderConfigDefaults(assert, zec)
+}
+
+func testConfigNewZapConfig(t *testing.T) {
+	t.Run("Defaults", testConfigNewZapConfigDefaults)
+	t.Run("Custom", testConfigNewZapConfigCustom)
+	t.Run("DevelopmentDefaults", testConfigNewZapConfigDevelopmentDefaults)
+}
+
+func testConfigBuildSimple(t *testing.T) {
+	var (
+		assert  = assert.New(t)
+		require = require.New(t)
+
+		output Buffer
+
+		c = Config{
+			Development: true,
+		}
+	)
+
+	// create an encoder config to replace the one created by the zap package
+	// so that we can run assertions
+	zec, err := EncoderConfig{}.NewZapcoreEncoderConfig()
+	require.NoError(err)
+
+	l, err := c.Build(
+		zap.WrapCore(func(zapcore.Core) zapcore.Core {
+			return zapcore.NewCore(
+				zapcore.NewJSONEncoder(zec),
+				&output,
+				zapcore.DebugLevel,
 			)
-
-			require.NoError(err)
-			assert.Equal(record.expected.Level, actual.Level)
-			assert.Equal(record.expected.Development, actual.Development)
-			assert.Equal(record.expected.DisableCaller, actual.DisableCaller)
-			assert.Equal(record.expected.DisableStacktrace, actual.DisableStacktrace)
-			assert.Equal(record.expected.Sampling, actual.Sampling)
-			assert.Equal(record.expected.Encoding, actual.Encoding)
-			assert.Equal(record.expected.OutputPaths, actual.OutputPaths)
-			assert.Equal(record.expected.ErrorOutputPaths, actual.ErrorOutputPaths)
-			assert.Equal(record.expected.InitialFields, actual.InitialFields)
-
-			assert.Equal(record.expected.EncoderConfig.MessageKey, actual.EncoderConfig.MessageKey)
-			assert.Equal(record.expected.EncoderConfig.LevelKey, actual.EncoderConfig.LevelKey)
-			assert.Equal(record.expected.EncoderConfig.TimeKey, actual.EncoderConfig.TimeKey)
-			assert.Equal(record.expected.EncoderConfig.NameKey, actual.EncoderConfig.NameKey)
-			assert.Equal(record.expected.EncoderConfig.CallerKey, actual.EncoderConfig.CallerKey)
-			assert.Equal(record.expected.EncoderConfig.FunctionKey, actual.EncoderConfig.FunctionKey)
-			assert.Equal(record.expected.EncoderConfig.StacktraceKey, actual.EncoderConfig.StacktraceKey)
-			assert.Equal(record.expected.EncoderConfig.LineEnding, actual.EncoderConfig.LineEnding)
-			assert.Equal(record.expected.EncoderConfig.ConsoleSeparator, actual.EncoderConfig.ConsoleSeparator)
-
-			assert.NotNil(actual.EncoderConfig.EncodeLevel)
-			assert.NotNil(actual.EncoderConfig.EncodeTime)
-			assert.NotNil(actual.EncoderConfig.EncodeDuration)
-			assert.NotNil(actual.EncoderConfig.EncodeCaller)
-			assert.NotNil(actual.EncoderConfig.EncodeName)
-		})
-	}
-}
-
-func testConfigNewZapConfigBadOutputPath(t *testing.T) {
-	var (
-		assert = assert.New(t)
-		config = Config{
-			Rotation: new(Rotation),
-			Config: zap.Config{
-				OutputPaths: []string{"#%@(&%(@%XX"},
-			},
-		}
+		}),
 	)
 
-	_, err := config.NewZapConfig()
-	assert.Error(err)
-}
-
-func testConfigNewZapConfigBadErrorOutputPath(t *testing.T) {
-	var (
-		assert = assert.New(t)
-		config = Config{
-			Rotation: new(Rotation),
-			Config: zap.Config{
-				ErrorOutputPaths: []string{"#%@(&%(@%XX"},
-			},
-		}
-	)
-
-	_, err := config.NewZapConfig()
-	assert.Error(err)
-}
-
-func testConfigBuildDefaultedEncoders(t *testing.T) {
-	var (
-		assert = assert.New(t)
-		config = Config{
-			Config: zap.Config{
-				EncoderConfig: zapcore.EncoderConfig{
-					// set all the keys to force zapcore's logic to run
-					MessageKey:    "1",
-					LevelKey:      "2",
-					TimeKey:       "3",
-					NameKey:       "4",
-					CallerKey:     "5",
-					FunctionKey:   "6",
-					StacktraceKey: "7",
-				},
-			},
-		}
-	)
-
-	l, err := config.Build()
-	assert.NotNil(l)
-	assert.NoError(err)
-}
-
-func testConfigBuildSuccess(t *testing.T) {
-	var (
-		assert = assert.New(t)
-		file   = filepath.Join(os.TempDir(), "sallust-test.json")
-		config = Config{
-			Rotation: &Rotation{
-				MaxSize: 100,
-			},
-			Config: zap.Config{
-				OutputPaths: []string{file},
-			},
-		}
-	)
-
-	defer os.Remove(file)
-	l, err := config.Build()
-	assert.NoError(err)
-	assert.NotNil(l)
-}
-
-func testConfigBuildBadOutputPath(t *testing.T) {
-	var (
-		assert = assert.New(t)
-		file   = filepath.Join(os.TempDir(), "#^@*&^$*%XX")
-		config = Config{
-			Rotation: &Rotation{
-				MaxSize: 100,
-			},
-			Config: zap.Config{
-				OutputPaths: []string{file},
-			},
-		}
-	)
-
-	defer os.Remove(file)
-	l, err := config.Build()
-	assert.Error(err)
-	assert.Nil(l)
+	require.NoError(err)
+	require.NotNil(l)
+	l.Info("test message")
+	assert.Greater(output.Len(), 0)
 }
 
 func testConfigBuild(t *testing.T) {
+	t.Run("Simple", testConfigBuildSimple)
 }
 
 func TestConfig(t *testing.T) {
-	t.Run("NewZapConfig", func(t *testing.T) {
-		t.Run("Success", testConfigNewZapConfigSuccess)
-		t.Run("BadOutputPath", testConfigNewZapConfigBadOutputPath)
-		t.Run("BadErrorOutputPath", testConfigNewZapConfigBadErrorOutputPath)
-	})
-
-	t.Run("Build", func(t *testing.T) {
-		t.Run("Success", testConfigBuildSuccess)
-		t.Run("BadOutputPath", testConfigBuildBadOutputPath)
-		t.Run("DefauledEncoders", testConfigBuildDefaultedEncoders)
-	})
+	t.Run("NewZapConfig", testConfigNewZapConfig)
+	t.Run("Build", testConfigBuild)
 }
