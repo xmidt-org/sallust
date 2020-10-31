@@ -117,6 +117,11 @@ type EncoderConfig struct {
 // setting DisableDefaultKeys to true.  The fields that are defaulted are:  MessageKey,
 // LevelKey, TimeKey, and NameKey.  The other logging key fields, such as CallerKey,
 // are not defaulted.  It's common to leave them turned off for performance or preference.
+//
+// This method returns an error, as the various UnmarshalText methods it uses return errors.
+// However, in actual practice this method returns a nil error since zapcore falls back to
+// known defaults for any unrecognized text.  This method still checks errors internally,
+// in case zapcore changes in the future.
 func (ec EncoderConfig) NewZapcoreEncoderConfig() (zec zapcore.EncoderConfig, err error) {
 	zec = zapcore.EncoderConfig{
 		MessageKey:       ec.MessageKey,
@@ -247,7 +252,7 @@ type Config struct {
 	// unless DisablePathExpansion is true.
 	//
 	// If Rotation is set, then each output path that is a system file will undergo
-	// log file rotation.
+	// log file rota
 	ErrorOutputPaths []string `json:"errorOutputPaths" yaml:"errorOutputPaths"`
 
 	// InitialFields corresponds to zap.Config.InitialFields.  Note that when unmarshaling
@@ -283,22 +288,6 @@ func (c Config) NewZapConfig() (zc zap.Config, err error) {
 		ErrorOutputPaths:  append([]string{}, c.ErrorOutputPaths...),
 	}
 
-	if len(c.Level) > 0 {
-		var l zapcore.Level
-		err = l.UnmarshalText([]byte(c.Level))
-		if err != nil {
-			return
-		}
-
-		zc.Level = zap.NewAtomicLevelAt(l)
-	} else {
-		zc.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
-	}
-
-	if zc.EncoderConfig, err = c.EncoderConfig.NewZapcoreEncoderConfig(); err != nil {
-		return
-	}
-
 	if c.Sampling != nil {
 		zc.Sampling = new(zap.SamplingConfig)
 		*zc.Sampling = *c.Sampling
@@ -310,36 +299,50 @@ func (c Config) NewZapConfig() (zc zap.Config, err error) {
 			zc.InitialFields[k] = v
 		}
 	}
-
-	pt := PathTransformer{
-		Rotation: c.Rotation,
+	if len(zc.Encoding) == 0 {
+		zc.Encoding = "json"
 	}
 
-	if !c.DisablePathExpansion {
-		pt.Mapping = c.Mapping
-		if pt.Mapping == nil {
-			pt.Mapping = os.Getenv
+	if zc.Development && len(zc.OutputPaths) == 0 {
+		// NOTE: difference from zap ... in development they send output to stderr
+		zc.OutputPaths = []string{"stdout"}
+	}
+
+	if len(zc.ErrorOutputPaths) == 0 {
+		zc.ErrorOutputPaths = []string{"stderr"}
+	}
+
+	if len(c.Level) > 0 {
+		var l zapcore.Level
+		err = l.UnmarshalText([]byte(c.Level))
+		if err == nil {
+			zc.Level = zap.NewAtomicLevelAt(l)
 		}
+
+	} else {
+		zc.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
 	}
 
-	zc.OutputPaths, err = ApplyTransform(pt.Transform, zc.OutputPaths...)
 	if err == nil {
-		zc.ErrorOutputPaths, err = ApplyTransform(pt.Transform, zc.ErrorOutputPaths...)
+		pt := PathTransformer{
+			Rotation: c.Rotation,
+		}
+
+		if !c.DisablePathExpansion {
+			pt.Mapping = c.Mapping
+			if pt.Mapping == nil {
+				pt.Mapping = os.Getenv
+			}
+		}
+
+		zc.OutputPaths, err = ApplyTransform(pt.Transform, zc.OutputPaths...)
+		if err == nil {
+			zc.ErrorOutputPaths, err = ApplyTransform(pt.Transform, zc.ErrorOutputPaths...)
+		}
 	}
 
 	if err == nil {
-		if len(zc.Encoding) == 0 {
-			zc.Encoding = "json"
-		}
-
-		if zc.Development && len(zc.OutputPaths) == 0 {
-			// NOTE: difference from zap ... in development they send output to stderr
-			zc.OutputPaths = []string{"stdout"}
-		}
-
-		if len(zc.ErrorOutputPaths) == 0 {
-			zc.ErrorOutputPaths = []string{"stderr"}
-		}
+		zc.EncoderConfig, err = c.EncoderConfig.NewZapcoreEncoderConfig()
 	}
 
 	return
@@ -347,11 +350,12 @@ func (c Config) NewZapConfig() (zc zap.Config, err error) {
 
 // Build behaves similarly to zap.Config.Build.  It uses the configuration created
 // by NewZapConfig to build the root logger.
-func (c Config) Build(opts ...zap.Option) (*zap.Logger, error) {
-	zapConfig, err := c.NewZapConfig()
-	if err != nil {
-		return nil, err
+func (c Config) Build(opts ...zap.Option) (l *zap.Logger, err error) {
+	var zc zap.Config
+	zc, err = c.NewZapConfig()
+	if err == nil {
+		l, err = zc.Build(opts...)
 	}
 
-	return zapConfig.Build(opts...)
+	return
 }
