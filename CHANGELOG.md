@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 - sonar integration
+- use a custom Config and EncoderConfig that are friendlier to libraries like viper
 
 ## [v0.1.3]
 - Sane defaults for fields in zap.Config and zap.EncoderConfig
