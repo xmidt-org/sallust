@@ -22,6 +22,55 @@ var (
 	nameEncoderType     = reflect.TypeOf(zapcore.NameEncoder(nil))
 )
 
+func decodeLevel(text string) (l zapcore.Level, err error) {
+	err = l.UnmarshalText([]byte(text))
+	return
+}
+
+func decodeLevelPointer(text string) (l *zapcore.Level, err error) {
+	l = new(zapcore.Level)
+	err = l.UnmarshalText([]byte(text))
+	return
+}
+
+func decodeAtomicLevel(text string) (al zap.AtomicLevel, err error) {
+	al = zap.NewAtomicLevel()
+	err = al.UnmarshalText([]byte(text))
+	return
+}
+
+func decodeAtomicLevelPointer(text string) (p *zap.AtomicLevel, err error) {
+	al := zap.NewAtomicLevel()
+	err = al.UnmarshalText([]byte(text))
+	p = &al
+	return
+}
+
+func decodeLevelEncoder(text string) (le zapcore.LevelEncoder, err error) {
+	err = le.UnmarshalText([]byte(text))
+	return
+}
+
+func decodeTimeEncoder(text string) (te zapcore.TimeEncoder, err error) {
+	err = te.UnmarshalText([]byte(text))
+	return
+}
+
+func decodeDurationEncoder(text string) (de zapcore.DurationEncoder, err error) {
+	err = de.UnmarshalText([]byte(text))
+	return
+}
+
+func decodeCallerEncoder(text string) (ce zapcore.CallerEncoder, err error) {
+	err = ce.UnmarshalText([]byte(text))
+	return
+}
+
+func decodeNameEncoder(text string) (ne zapcore.NameEncoder, err error) {
+	err = ne.UnmarshalText([]byte(text))
+	return
+}
+
 // DecodeHook is an all-in-one mapstructure DecodeHookFunc that converts from
 // a string (typically unmarshaled in something like spf13/viper) into the appropriate
 // configuration field required by zapcore.
@@ -49,51 +98,35 @@ func DecodeHook(from, to reflect.Type, src interface{}) (interface{}, error) {
 		return src, nil
 	}
 
+	text := src.(string)
+
 	switch to {
 	case levelType:
-		var l zapcore.Level
-		err := l.UnmarshalText([]byte(src.(string)))
-		return l, err
+		return decodeLevel(text)
 
 	case levelPtrType:
-		l := new(zapcore.Level)
-		err := l.UnmarshalText([]byte(src.(string)))
-		return l, err
+		return decodeLevelPointer(text)
 
 	case atomicLevelType:
-		l := zap.NewAtomicLevel()
-		err := l.UnmarshalText([]byte(src.(string)))
-		return l, err
+		return decodeAtomicLevel(text)
 
 	case atomicLevelPtrType:
-		l := zap.NewAtomicLevel()
-		err := l.UnmarshalText([]byte(src.(string)))
-		return &l, err
+		return decodeAtomicLevelPointer(text)
 
 	case levelEncoderType:
-		var le zapcore.LevelEncoder
-		err := le.UnmarshalText([]byte(src.(string)))
-		return le, err
+		return decodeLevelEncoder(text)
 
 	case timeEncoderType:
-		var te zapcore.TimeEncoder
-		err := te.UnmarshalText([]byte(src.(string)))
-		return te, err
+		return decodeTimeEncoder(text)
 
 	case durationEncoderType:
-		var de zapcore.DurationEncoder
-		err := de.UnmarshalText([]byte(src.(string)))
-		return de, err
+		return decodeDurationEncoder(text)
 
 	case callerEncoderType:
-		var ce zapcore.CallerEncoder
-		err := ce.UnmarshalText([]byte(src.(string)))
-		return ce, err
+		return decodeCallerEncoder(text)
 
 	case nameEncoderType:
-		var ne zapcore.NameEncoder
-		err := ne.UnmarshalText([]byte(src.(string)))
-		return ne, err
+		return decodeNameEncoder(text)
 
 	default:
 		return src, nil
