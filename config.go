@@ -105,6 +105,24 @@ type EncoderConfig struct {
 	ConsoleSeparator string `json:"consoleSeparator" yaml:"consoleSeparator"`
 }
 
+func applyEncoderConfigDefaults(zec *zapcore.EncoderConfig) {
+	if len(zec.MessageKey) == 0 {
+		zec.MessageKey = "msg"
+	}
+
+	if len(zec.LevelKey) == 0 {
+		zec.LevelKey = "level"
+	}
+
+	if len(zec.TimeKey) == 0 {
+		zec.TimeKey = "ts"
+	}
+
+	if len(zec.NameKey) == 0 {
+		zec.NameKey = "name"
+	}
+}
+
 // NewZapcoreEncoderConfig converts this instance into a zapcore.EncoderConfig.
 //
 // In order to ease configuration of zap, this method implements a few conveniences
@@ -136,21 +154,7 @@ func (ec EncoderConfig) NewZapcoreEncoderConfig() (zec zapcore.EncoderConfig, er
 	}
 
 	if !ec.DisableDefaultKeys {
-		if len(zec.MessageKey) == 0 {
-			zec.MessageKey = "msg"
-		}
-
-		if len(zec.LevelKey) == 0 {
-			zec.LevelKey = "level"
-		}
-
-		if len(zec.TimeKey) == 0 {
-			zec.TimeKey = "ts"
-		}
-
-		if len(zec.NameKey) == 0 {
-			zec.NameKey = "name"
-		}
+		applyEncoderConfigDefaults(&zec)
 	}
 
 	if len(ec.EncodeLevel) > 0 {
