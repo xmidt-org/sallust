@@ -279,6 +279,26 @@ type Config struct {
 	Rotation *Rotation `json:"rotation,omitempty" yaml:"rotation,omitempty"`
 }
 
+func applyConfigDefaults(zc *zap.Config) {
+	if len(zc.Encoding) == 0 {
+		zc.Encoding = "json"
+	}
+
+	if zc.Development && len(zc.OutputPaths) == 0 {
+		// NOTE: difference from zap ... in development they send output to stderr
+		zc.OutputPaths = []string{"stdout"}
+	}
+
+	if len(zc.ErrorOutputPaths) == 0 {
+		zc.ErrorOutputPaths = []string{"stderr"}
+	}
+
+	// NOTE: can't compare the Level with nil very easily, so just
+	// unconditionally set this default.  It will be overwritten
+	// by decoding code if appropriate.
+	zc.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
+}
+
 // NewZapConfig creates a zap.Config enriched with features from these Options.
 // Primarily, this involves creating lumberjack URLs so that the registered sink
 // will create the appropriate infrastructure to do log file rotation.
@@ -303,18 +323,8 @@ func (c Config) NewZapConfig() (zc zap.Config, err error) {
 			zc.InitialFields[k] = v
 		}
 	}
-	if len(zc.Encoding) == 0 {
-		zc.Encoding = "json"
-	}
 
-	if zc.Development && len(zc.OutputPaths) == 0 {
-		// NOTE: difference from zap ... in development they send output to stderr
-		zc.OutputPaths = []string{"stdout"}
-	}
-
-	if len(zc.ErrorOutputPaths) == 0 {
-		zc.ErrorOutputPaths = []string{"stderr"}
-	}
+	applyConfigDefaults(&zc)
 
 	if len(c.Level) > 0 {
 		var l zapcore.Level
@@ -322,9 +332,6 @@ func (c Config) NewZapConfig() (zc zap.Config, err error) {
 		if err == nil {
 			zc.Level = zap.NewAtomicLevelAt(l)
 		}
-
-	} else {
-		zc.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
 	}
 
 	if err == nil {
