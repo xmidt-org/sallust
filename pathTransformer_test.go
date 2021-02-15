@@ -9,6 +9,8 @@ import (
 )
 
 func testPathTransformerSuccess(t *testing.T) {
+	const testValue = "test"
+
 	testData := []struct {
 		pt       PathTransformer
 		path     string
@@ -32,7 +34,7 @@ func testPathTransformerSuccess(t *testing.T) {
 		{
 			pt: PathTransformer{
 				Mapping: func(v string) string {
-					if v == "test" {
+					if v == testValue {
 						return "stdout"
 					}
 
@@ -75,7 +77,7 @@ func testPathTransformerSuccess(t *testing.T) {
 					MaxSize: 150,
 				},
 				Mapping: func(v string) string {
-					if v == "test" {
+					if v == testValue {
 						return "/var/log"
 					}
 
@@ -93,7 +95,7 @@ func testPathTransformerSuccess(t *testing.T) {
 					LocalTime:  true,
 				},
 				Mapping: func(v string) string {
-					if v == "test" {
+					if v == testValue {
 						return "/var/log"
 					}
 
