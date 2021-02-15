@@ -209,11 +209,11 @@ func testNewLumberjackSinkInvalidURL(t *testing.T) {
 		},
 	}
 
-	for i, badURL := range testData {
+	for i := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var (
 				assert = assert.New(t)
-				s, err = NewLumberjackSink(&badURL)
+				s, err = NewLumberjackSink(&testData[i])
 			)
 
 			assert.Error(err)
