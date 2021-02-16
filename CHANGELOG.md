@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [v0.1.4]
 - sonar integration
 - use a custom Config and EncoderConfig that are friendlier to libraries like viper
 
@@ -21,7 +23,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [v0.1.0]
 - First release
 
-[Unreleased]: https://github.com/xmidt-org/sallust/compare/v0.1.3..HEAD
+[Unreleased]: https://github.com/xmidt-org/sallust/compare/v0.1.4..HEAD
+[v0.1.4]: https://github.com/xmidt-org/sallust/compare/0.1.3...v0.1.4
 [v0.1.3]: https://github.com/xmidt-org/sallust/compare/0.1.2...v0.1.3
 [v0.1.2]: https://github.com/xmidt-org/sallust/compare/0.1.1...v0.1.2
 [v0.1.1]: https://github.com/xmidt-org/sallust/compare/0.1.0...v0.1.1
