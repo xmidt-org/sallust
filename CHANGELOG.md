@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- sallustkit package adapts go-kit's logging onto zap's
+
 ## [v0.1.4]
 - sonar integration
 - use a custom Config and EncoderConfig that are friendlier to libraries like viper
