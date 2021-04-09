@@ -114,7 +114,7 @@ func (cc *CaptureCore) Len() (n int) {
 // This function may be used with zap.WrapCore.
 //
 //   var l *zap.Logger = ...
-//   l = l.WithOptions(sallust.Capture)
+//   l = l.WithOptions(zap.WrapCore(sallust.Capture))
 //   cc := l.Core().(*sallust.CaptureCore)
 func Capture(c zapcore.Core) zapcore.Core {
 	return &CaptureCore{
