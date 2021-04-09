@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
-- sallustkit package adapts go-kit's logging onto zap's [#15](https://github.com/xmidt-org/sallust/issues/15)
+- sallustkit package adapts go-kit's logging onto zap [#15](https://github.com/xmidt-org/sallust/issues/15)
 
 ## [v0.1.4]
 - sonar integration
