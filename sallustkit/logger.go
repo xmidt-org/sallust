@@ -102,7 +102,10 @@ func (l Logger) Log(keyvals ...interface{}) error {
 			message    = NoLogMessage
 			messageKey = DefaultMessageKey
 			lvl        = l.DefaultLevel
-			fields     = make([]zap.Field, 0, len(keyvals)/2)
+
+			// this is the maximum size we'll ever need for the fields,
+			// which means we only ever have (1) allocation
+			fields = make([]zap.Field, 0, 1+len(keyvals)/2)
 		)
 
 		if len(l.MessageKey) > 0 {
