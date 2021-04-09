@@ -30,7 +30,7 @@ func ExampleLogger_custom() {
 	// the message will still be output to whatever zap is configured with
 	l.Log("message", "hello, world!", "duration", 15*time.Second)
 
-	// override the DefaultLevel with that's passed to Log
+	// override the DefaultLevel with what's passed to Log
 	l.Log("message", "this entry supplies a level", "value", 123, "this key doesn't matter", level.DebugValue())
 
 	// Output:
