@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v0.1.5]
+
 ### Added
 - sallustkit package adapts go-kit's logging onto zap [#15](https://github.com/xmidt-org/sallust/issues/15)
 
@@ -26,7 +28,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [v0.1.0]
 - First release
 
-[Unreleased]: https://github.com/xmidt-org/sallust/compare/v0.1.4..HEAD
+[Unreleased]: https://github.com/xmidt-org/sallust/compare/v0.1.5..HEAD
+[v0.1.5]: https://github.com/xmidt-org/sallust/compare/0.1.4...v0.1.5
 [v0.1.4]: https://github.com/xmidt-org/sallust/compare/0.1.3...v0.1.4
 [v0.1.3]: https://github.com/xmidt-org/sallust/compare/0.1.2...v0.1.3
 [v0.1.2]: https://github.com/xmidt-org/sallust/compare/0.1.1...v0.1.2
