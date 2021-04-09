@@ -77,23 +77,23 @@ var _ log.Logger = Logger{}
 //   given:
 //
 //   l, _ := zap.NewDevelopment() // or any *zap.Logger
-//   go-kit := sallustkit.Logger{
+//   gokit := sallustkit.Logger{
 //     Zap: l,
 //     // take the defaults for the other fields
 //   }
 //
 //   then:
 //
-//   this:     go-kit.Log("msg", "hi there", "value", 123)
+//   this:     gokit.Log("msg", "hi there", "value", 123)
 //   becomes:  l.Error("hi there", zap.Any("value", 123)) // defaults to error, change this by setting go-kit.DefaultLevel
 //
-//   this:     go-kit.Log("msg", "more values", "name1", "value1", "name2", 45.6)
+//   this:     gokit.Log("msg", "more values", "name1", "value1", "name2", 45.6)
 //   becomes:  l.Error("more values", zap.Any("name1", "value1"), zap.Any("name2", 45.6))
 //
-//   this:     go-kit.Log(level.Key(), level.InfoValue(), "value", 123)
+//   this:     gokit.Log(level.Key(), level.InfoValue(), "value", 123)
 //   becomes:  l.Info("No log message found", zap.Any("value", 123))
 //
-//   this:     go-kit.Log("msg", "hi there", "this key doesn't matter", level.DebugValue())
+//   this:     gokit.Log("msg", "hi there", "this key doesn't matter", level.DebugValue())
 //   becomes:  l.Debug("hi there") // if a value is a go-kit level.Value, the key is ignored
 //
 func (l Logger) Log(keyvals ...interface{}) error {
