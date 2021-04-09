@@ -69,7 +69,7 @@ var _ log.Logger = Logger{}
 //
 //   given:
 //
-//   l := zap.NewDevelopment() // or any *zap.Logger
+//   l, _ := zap.NewDevelopment() // or any *zap.Logger
 //   gokit := sallustkit.Logger{
 //     Zap: l,
 //     // take the defaults for the other fields
@@ -78,7 +78,7 @@ var _ log.Logger = Logger{}
 //   then:
 //
 //   this:     gokit.Log("msg", "hi there", "value", 123)
-//   becomes:  l.Error("hi there", zap.Any("value", 123)) // no level, can change this by setting gokit.DefaultLevel
+//   becomes:  l.Error("hi there", zap.Any("value", 123)) // defaults to error, change this by setting gokit.DefaultLevel
 //
 //   this:     gokit.Log("msg", "more values", "name1", "value1", "name2", 45.6)
 //   becomes:  l.Error("more values", zap.Any("name1", "value1"), zap.Any("name2", 45.6))
