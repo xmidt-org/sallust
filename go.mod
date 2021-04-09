@@ -12,3 +12,5 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.4 // indirect
 )
+
+exclude github.com/gorilla/websocket v0.0.0-20170926233335-4201258b820c
