@@ -53,15 +53,23 @@ var _ log.Logger = Logger{}
 
 // Log accepts key/value pairs in the typical go-kit fashion and parses them
 // to use with the configured zap logger.  This method always returns nil.
+// If keyvals is empty, then this method returns with no output.
 //
 // Each key/value pair is examined and used to build up a method call to
 // the configured zap logger using the following basic steps:
 //
-//   - Any key that is not a string results in a NotAString name/value pair in the zap output
+//   - Any key that is not a string results in a NotAString key in the zap output
+//
+//   - If keyvals is of odd length, then the last key is emitted as a zap.NamedError
+//     with the value of gokit's log.ErrMissingValue.
+//
 //   - The value for any key that equals the configured MessageKey (or, DefaultMessageKey
 //     if that field is unset) is used as the first parameter to the zap logger method.
+//
 //   - Any value that is a defined go-kit level.Value is used to determine which zap
 //     logger method is invoked, e.g. level.DebugValue() results in the Debug method, etc.
+//     In this case, the associated key is ignored.
+//
 //   - Any key/value not matching the above steps is passed to the zap logger method
 //     as a zap.Any field.
 //
