@@ -7,15 +7,20 @@ import (
 )
 
 const (
-	// NotAString is used in log output when a key was not a string.
-	NotAString = "(KEY IS NOT A STRING)"
+	// NotAString is used in log output when a key or value which should
+	// have been a string was not a string.
+	NotAString = "(NOT A STRING)"
 
 	// NoLogMessage is used as the log message when no message could be
 	// found in the go-kit keyvals.
 	NoLogMessage = "No log message found"
 
 	// DefaultMessageKey is the key assumed to hold the log message when no
-	// MessageKey is set.
+	// MessageKey is set.  This is used when parsing go-kit Log keyvals.
+	//
+	// NOTE: This is not the same as the key used by zap to output the message
+	// in its log output.  That is controlled by the zap configuration, which
+	// may be a sallust.Config.
 	DefaultMessageKey = "msg"
 )
 
