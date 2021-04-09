@@ -7,8 +7,7 @@ import (
 )
 
 const (
-	// NotAString is used in log output when a key or value was expected
-	// to be a string but was not.
+	// NotAString is used in log output when a key was not a string.
 	NotAString = "(KEY IS NOT A STRING)"
 
 	// NoLogMessage is used as the log message when no message could be
@@ -61,7 +60,7 @@ var _ log.Logger = Logger{}
 //   - Any key that is not a string results in a NotAString key in the zap output
 //
 //   - If keyvals is of odd length, then the last key is emitted as a zap.NamedError
-//     with the value of gokit's log.ErrMissingValue.
+//     with the value of go-kit's log.ErrMissingValue.
 //
 //   - The value for any key that equals the configured MessageKey (or, DefaultMessageKey
 //     if that field is unset) is used as the first parameter to the zap logger method.
@@ -78,24 +77,24 @@ var _ log.Logger = Logger{}
 //   given:
 //
 //   l, _ := zap.NewDevelopment() // or any *zap.Logger
-//   gokit := sallustkit.Logger{
+//   go-kit := sallustkit.Logger{
 //     Zap: l,
 //     // take the defaults for the other fields
 //   }
 //
 //   then:
 //
-//   this:     gokit.Log("msg", "hi there", "value", 123)
-//   becomes:  l.Error("hi there", zap.Any("value", 123)) // defaults to error, change this by setting gokit.DefaultLevel
+//   this:     go-kit.Log("msg", "hi there", "value", 123)
+//   becomes:  l.Error("hi there", zap.Any("value", 123)) // defaults to error, change this by setting go-kit.DefaultLevel
 //
-//   this:     gokit.Log("msg", "more values", "name1", "value1", "name2", 45.6)
+//   this:     go-kit.Log("msg", "more values", "name1", "value1", "name2", 45.6)
 //   becomes:  l.Error("more values", zap.Any("name1", "value1"), zap.Any("name2", 45.6))
 //
-//   this:     gokit.Log(level.Key(), level.InfoValue(), "value", 123)
+//   this:     go-kit.Log(level.Key(), level.InfoValue(), "value", 123)
 //   becomes:  l.Info("No log message found", zap.Any("value", 123))
 //
-//   this:     gokit.Log("msg", "hi there", "this key doesn't matter", level.DebugValue())
-//   becomes:  l.Debug("hi there") // if a value is a gokit level.Value, the key is ignored
+//   this:     go-kit.Log("msg", "hi there", "this key doesn't matter", level.DebugValue())
+//   becomes:  l.Debug("hi there") // if a value is a go-kit level.Value, the key is ignored
 //
 func (l Logger) Log(keyvals ...interface{}) error {
 	if len(keyvals) > 0 {
