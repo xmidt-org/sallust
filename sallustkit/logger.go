@@ -19,7 +19,7 @@ const (
 	DefaultMessageKey = "msg"
 )
 
-// toString attempts to cast v to a string, returning notAString
+// toString attempts to cast v to a string, returning NotAString
 // if it isn't a string.
 func toString(v interface{}) string {
 	s, ok := v.(string)
