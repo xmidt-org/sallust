@@ -16,6 +16,26 @@ type LoggerTestSuite struct {
 
 var _ suite.SetupTestSuite = (*LoggerTestSuite)(nil)
 
+func (suite *LoggerTestSuite) TestNoOutput() {
+	l := Logger{
+		Zap: suite.zapLogger,
+	}
+
+	suite.NoError(
+		l.Log(),
+	)
+
+	suite.Zero(suite.core.Len())
+}
+
+func (suite *LoggerTestSuite) TestNoZap() {
+	l := Logger{}
+
+	suite.Panics(func() {
+		l.Log("msg", "this shouldn't exist!")
+	})
+}
+
 func (suite *LoggerTestSuite) TestNoSuppliedLevel() {
 	suite.Run("NoDefaultLevel", func() {
 		suite.core.ClearMessages()
@@ -23,7 +43,10 @@ func (suite *LoggerTestSuite) TestNoSuppliedLevel() {
 			Zap: suite.zapLogger,
 		}
 
-		l.Log(DefaultMessageKey, "test message", "value", 123)
+		suite.NoError(
+			l.Log(DefaultMessageKey, "test message", "value", 123),
+		)
+
 		suite.assertOneMessage(func(e zapcore.Entry, fs []zap.Field) error {
 			suite.Equal("test message", e.Message)
 			suite.Equal(zap.ErrorLevel, e.Level)
@@ -43,7 +66,10 @@ func (suite *LoggerTestSuite) TestNoSuppliedLevel() {
 			DefaultLevel: level.InfoValue(),
 		}
 
-		l.Log(DefaultMessageKey, "test message", "value", 123)
+		suite.NoError(
+			l.Log(DefaultMessageKey, "test message", "value", 123),
+		)
+
 		suite.assertOneMessage(func(e zapcore.Entry, fs []zap.Field) error {
 			suite.Equal("test message", e.Message)
 			suite.Equal(zap.InfoLevel, e.Level)
@@ -63,7 +89,10 @@ func (suite *LoggerTestSuite) TestLevelSupplied() {
 		DefaultLevel: level.WarnValue(), // verify that this is overwritten
 	}
 
-	l.Log("value", 123, DefaultMessageKey, "test message", "doesn't matter", level.InfoValue())
+	suite.NoError(
+		l.Log("value", 123, DefaultMessageKey, "test message", "doesn't matter", level.InfoValue()),
+	)
+
 	suite.assertOneMessage(func(e zapcore.Entry, fs []zap.Field) error {
 		suite.Equal("test message", e.Message)
 		suite.Equal(zap.InfoLevel, e.Level)
@@ -81,7 +110,10 @@ func (suite *LoggerTestSuite) TestNoMessageSupplied() {
 		Zap: suite.zapLogger,
 	}
 
-	l.Log("value", 123)
+	suite.NoError(
+		l.Log("value", 123),
+	)
+
 	suite.assertOneMessage(func(e zapcore.Entry, fs []zap.Field) error {
 		suite.Equal(NoLogMessage, e.Message)
 		suite.Equal(zap.ErrorLevel, e.Level)
@@ -100,7 +132,10 @@ func (suite *LoggerTestSuite) TestCustomMessageKey() {
 		MessageKey: "custom",
 	}
 
-	l.Log("value", 123, "custom", "test message")
+	suite.NoError(
+		l.Log("value", 123, "custom", "test message"),
+	)
+
 	suite.assertOneMessage(func(e zapcore.Entry, fs []zap.Field) error {
 		suite.Equal("test message", e.Message)
 		suite.Equal(zap.ErrorLevel, e.Level)
@@ -118,7 +153,10 @@ func (suite *LoggerTestSuite) TestOddKeyvals() {
 		Zap: suite.zapLogger,
 	}
 
-	l.Log("value", 123, DefaultMessageKey, "test message", "dangling")
+	suite.NoError(
+		l.Log("value", 123, DefaultMessageKey, "test message", "dangling"),
+	)
+
 	suite.assertOneMessage(func(e zapcore.Entry, fs []zap.Field) error {
 		suite.Equal("test message", e.Message)
 		suite.Equal(zap.ErrorLevel, e.Level)
@@ -136,7 +174,10 @@ func (suite *LoggerTestSuite) TestNotAString() {
 		Zap: suite.zapLogger,
 	}
 
-	l.Log(45.6, 123, DefaultMessageKey, "test message")
+	suite.NoError(
+		l.Log(45.6, 123, DefaultMessageKey, "test message"),
+	)
+
 	suite.assertOneMessage(func(e zapcore.Entry, fs []zap.Field) error {
 		suite.Equal("test message", e.Message)
 		suite.Equal(zap.ErrorLevel, e.Level)
