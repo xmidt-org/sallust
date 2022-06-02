@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Removed
+- fx.Printer was deprecated, so that functionality has been removed from this library
+
 ## [v0.1.5]
 
 ### Added
