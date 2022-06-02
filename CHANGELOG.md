@@ -9,9 +9,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Bootstrapping a zap logger for a fx application, including the fxevent.Logger
 
-### Removed
-- fx.Printer was deprecated, so that functionality has been removed from this library
-
 ## [v0.1.5]
 
 ### Added
