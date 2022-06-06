@@ -98,7 +98,12 @@ func SyncOnShutdown() fx.Option {
 		func(logger *zap.Logger, lifecycle fx.Lifecycle) {
 			lifecycle.Append(fx.Hook{
 				OnStop: func(context.Context) error {
-					return logger.Sync()
+					logger.Sync()
+
+					// NOTE: do NOT return the error from Sync.
+					// A non-nil error may short-circuit app shutdown,
+					// and logger errors during shutdown are never fatal.
+					return nil
 				},
 			})
 		},
