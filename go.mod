@@ -3,12 +3,11 @@ module github.com/xmidt-org/sallust
 go 1.14
 
 require (
-	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/go-kit/kit v0.10.0
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/dig v1.14.1 // indirect
-	go.uber.org/fx v1.17.1 // indirect
+	go.uber.org/fx v1.17.1
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.21.0
 	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
