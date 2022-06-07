@@ -55,7 +55,9 @@ func (suite *FxSuite) testWithLoggerFull() {
 					zap.Hooks(injectedHook),
 				},
 			),
-			WithLogger(zap.Hooks(suppliedHook)),
+			WithLogger(
+				zap.Hooks(suppliedHook),
+			),
 			fx.Populate(&logger),
 		)
 	)
@@ -79,6 +81,45 @@ func (suite *FxSuite) testWithLoggerFull() {
 func (suite *FxSuite) TestWithLogger() {
 	suite.Run("Default", suite.testWithLoggerDefault)
 	suite.Run("Full", suite.testWithLoggerFull)
+}
+
+type syncCore struct {
+	zapcore.Core
+
+	synced bool
+}
+
+func (sc *syncCore) Sync() error {
+	sc.synced = true
+	return sc.Core.Sync()
+}
+
+func (suite *FxSuite) TestSyncOnShutdown() {
+	var (
+		logger *zap.Logger
+
+		app = fxtest.New(
+			suite.T(),
+			WithLogger(
+				zap.WrapCore(
+					func(c zapcore.Core) zapcore.Core {
+						return &syncCore{
+							Core: c,
+						}
+					},
+				),
+			),
+			fx.Populate(&logger),
+			SyncOnShutdown(),
+		)
+	)
+
+	app.RequireStart()
+	app.RequireStop()
+
+	suite.Require().NotNil(logger)
+	logger.Error("expected error")
+	suite.True(logger.Core().(*syncCore).synced)
 }
 
 func TestFx(t *testing.T) {

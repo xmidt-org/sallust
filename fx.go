@@ -51,39 +51,6 @@ func WithLogger(options ...zap.Option) fx.Option {
 	)
 }
 
-// WithFields decorates a logger within the application by adding
-// the given fields.  A *zap.Logger within the enclosing app is required.
-func WithFields(fields ...zap.Field) fx.Option {
-	return fx.Decorate(
-		func(l *zap.Logger) *zap.Logger {
-			return l.With(fields...)
-		},
-	)
-}
-
-// WithOptions decorates a logger within the application by applying
-// the given options.  A *zap.Logger within the enclosing app is required.
-func WithOptions(options ...zap.Option) fx.Option {
-	return fx.Decorate(
-		func(l *zap.Logger) *zap.Logger {
-			return l.WithOptions(options...)
-		},
-	)
-}
-
-// WithName decorates a logger within the application by adding a name
-// to the logger's sequence of names.  Optionally, one or more fields
-// can also be applied the same as if WithFields was called.
-//
-// A *zap.Logger within the enclosing app is required.
-func WithName(name string, fields ...zap.Field) fx.Option {
-	return fx.Decorate(
-		func(l *zap.Logger) *zap.Logger {
-			return l.Named(name).With(fields...)
-		},
-	)
-}
-
 // SyncOnShutdown adds an fx lifecycle hook that invokes Sync on the application's logger.
 // Generally, this option should be placed as an fx.Invoke last in the set of options.
 // That ensures that log entries from other lifecycle OnStop hooks are written to log sinks.
