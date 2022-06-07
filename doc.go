@@ -1,6 +1,9 @@
 /*
-Package sallust provides log rotation and advanced configuration for the
-go.uber.org/zap logging package.  It implements a few other niceties, such
-as path expansion using environment variables and capture log output to a buffer.
+Package sallust adds a few useful features around the go.uber.org/zap package:
+
+- log rotation
+- path expansion using environment variables
+- unmarshal-friendly configuration
+- bootstrapping logging for a go.uber.org/fx application
 */
 package sallust
