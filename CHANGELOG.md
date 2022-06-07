@@ -8,7 +8,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 - Bootstrapping a zap logger for a fx application, including the fxevent.Logger
-- Logger decoration for applying fields, options, and naming
 
 ## [v0.1.5]
 
