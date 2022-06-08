@@ -13,6 +13,8 @@ import (
 // is cleared before writing more log information.  All methods of a Buffer
 // may be called concurrently.  The zero value of a Buffer is valid, and is
 // an unlimited size in-memory sink for logs.
+//
+// Deprecated:  This will be removed in a future release.  Use the zaptest package instead.
 type Buffer struct {
 	lock   sync.Mutex
 	buffer bytes.Buffer

@@ -16,6 +16,8 @@ type message struct {
 // it available for inspection in it's structured form.  This type allows
 // tests to examine log output programmatically in a way that is much easier
 // than simply parsing text.
+//
+// Deprecated:  This will be removed in a future release.  Use the zaptest package instead.
 type CaptureCore struct {
 	// Core is the zap.Core to which output is delegated
 	zapcore.Core
