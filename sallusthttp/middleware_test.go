@@ -1,16 +1,15 @@
 package sallusthttp
 
 import (
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/xmidt-org/sallust"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest/observer"
 )
 
 func testMiddlewareDefaults(t *testing.T) {
@@ -41,41 +40,28 @@ func testMiddlewareDefaults(t *testing.T) {
 
 func testMiddlewareDecorate(t *testing.T) {
 	var (
-		assert  = assert.New(t)
-		require = require.New(t)
+		assert     = assert.New(t)
+		core, logs = observer.New(zapcore.DebugLevel)
 
 		next http.Handler = http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 			logger := Get(request)
 			logger.Info("message")
 			logger.Sync()
 
-			cc, ok := logger.Core().(*sallust.CaptureCore)
-			require.True(ok)
-
-			n, err := cc.EachMessage(func(e zapcore.Entry, f []zapcore.Field) error {
-				assert.Equal("message", e.Message)
+			assert.Equal(1, logs.Len())
+			for _, le := range logs.TakeAll() {
+				assert.Equal("message", le.Entry.Message)
 				assert.Equal(
 					[]zapcore.Field{zap.String("foo", "bar")},
-					f,
+					le.Context,
 				)
-
-				return nil
-			})
-
-			assert.Equal(1, n)
-			assert.NoError(err)
+			}
 
 			response.WriteHeader(599)
 		})
 
-		enc = zapcore.NewJSONEncoder(zapcore.EncoderConfig{
-			MessageKey: "msg",
-		})
-
 		m = Middleware{
-			Base: zap.New(
-				sallust.NewCaptureCore(enc, zapcore.AddSync(ioutil.Discard), zapcore.DebugLevel),
-			),
+			Base: zap.New(core),
 		}
 
 		response = httptest.NewRecorder()
@@ -94,41 +80,28 @@ func testMiddlewareDecorate(t *testing.T) {
 
 func testMiddlewareDecorateFunc(t *testing.T) {
 	var (
-		assert  = assert.New(t)
-		require = require.New(t)
+		assert     = assert.New(t)
+		core, logs = observer.New(zapcore.DebugLevel)
 
 		next = http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 			logger := Get(request)
 			logger.Info("message")
 			logger.Sync()
 
-			cc, ok := logger.Core().(*sallust.CaptureCore)
-			require.True(ok)
-
-			n, err := cc.EachMessage(func(e zapcore.Entry, f []zapcore.Field) error {
-				assert.Equal("message", e.Message)
+			assert.Equal(1, logs.Len())
+			for _, le := range logs.TakeAll() {
+				assert.Equal("message", le.Entry.Message)
 				assert.Equal(
 					[]zapcore.Field{zap.String("foo", "bar")},
-					f,
+					le.Context,
 				)
-
-				return nil
-			})
-
-			assert.Equal(1, n)
-			assert.NoError(err)
+			}
 
 			response.WriteHeader(599)
 		})
 
-		enc = zapcore.NewJSONEncoder(zapcore.EncoderConfig{
-			MessageKey: "msg",
-		})
-
 		m = Middleware{
-			Base: zap.New(
-				sallust.NewCaptureCore(enc, zapcore.AddSync(ioutil.Discard), zapcore.DebugLevel),
-			),
+			Base: zap.New(core),
 		}
 
 		response = httptest.NewRecorder()

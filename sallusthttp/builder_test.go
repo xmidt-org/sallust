@@ -7,9 +7,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/xmidt-org/sallust"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest/observer"
 )
 
 func TestBuilders(t *testing.T) {
@@ -23,15 +23,9 @@ func TestBuilders(t *testing.T) {
 			zap.String("testy", "mctest"),
 		}
 
-		buffer sallust.Buffer
-		enc    = zapcore.NewJSONEncoder(zapcore.EncoderConfig{
-			// omit normal keys for easier comparisons
-			NameKey: "name",
-		})
-
-		core    = sallust.NewCaptureCore(enc, &buffer, zapcore.DebugLevel)
-		base    = zap.New(core)
-		request = httptest.NewRequest("PUT", "/test", nil)
+		core, logs = observer.New(zapcore.DebugLevel)
+		base       = zap.New(core)
+		request    = httptest.NewRequest("PUT", "/test", nil)
 	)
 
 	request.RemoteAddr = "127.0.0.1"
@@ -49,18 +43,11 @@ func TestBuilders(t *testing.T) {
 
 	l.Info("test")
 	l.Sync()
-
-	// need to pull out the decorated CaptureCore
-	decorated, ok := l.Core().(*sallust.CaptureCore)
-	require.True(ok)
-	n, err := decorated.EachMessage(func(e zapcore.Entry, actual []zapcore.Field) error {
-		assert.ElementsMatch(expected, actual)
-		assert.Equal("testHandler", e.LoggerName)
-		return nil
-	})
-
-	assert.Equal(1, n)
-	assert.NoError(err)
+	assert.Equal(1, logs.Len())
+	for _, le := range logs.TakeAll() {
+		assert.ElementsMatch(expected, le.Context)
+		assert.Equal("testHandler", le.Entry.LoggerName)
+	}
 }
 
 func TestMethod(t *testing.T) {
