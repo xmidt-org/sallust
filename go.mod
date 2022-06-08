@@ -3,15 +3,13 @@ module github.com/xmidt-org/sallust
 go 1.14
 
 require (
-	github.com/go-kit/kit v0.10.0
+	github.com/go-kit/kit v0.12.0
 	github.com/stretchr/testify v1.7.0
-	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/dig v1.14.1 // indirect
 	go.uber.org/fx v1.17.1
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.21.0
-	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
-	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
+	golang.org/x/sys v0.0.0-20220608164250-635b8c9b7f68 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
 
