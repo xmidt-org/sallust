@@ -10,7 +10,7 @@ require (
 	go.uber.org/fx v1.17.1
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.21.0
-	golang.org/x/sys v0.0.0-20220624220833-87e55d714810 // indirect
+	golang.org/x/sys v0.0.0-20220627191245-f75cf1eec38b // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
 
