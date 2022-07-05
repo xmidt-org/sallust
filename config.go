@@ -75,30 +75,30 @@ type EncoderConfig struct {
 	// EncodeLevel determines how levels are represented.  If unset, LowercaseLevelEncoder is used.
 	//
 	// See: https://pkg.go.dev/go.uber.org/zap/zapcore#LowercaseLevelEncoder
-	EncodeLevel string `json:"levelEncoder" yaml:"levelEncoder"`
+	EncodeLevel string `json:"levelEncoder" yaml:"levelEncoder" mapstructure:"levelEncoder"`
 
 	// EncodeTime determines how timestamps are represented.  If unset, RFC3339TimeEncoder is used.
 	//
 	// See: https://pkg.go.dev/go.uber.org/zap/zapcore#RFC3339TimeEncoder
-	EncodeTime string `json:"timeEncoder" yaml:"timeEncoder"`
+	EncodeTime string `json:"timeEncoder" yaml:"timeEncoder" mapstructure:"timeEncoder"`
 
 	// EncodeDuration determines how time durations are represented.  If unset,
 	// StringDurationEncoder is used.
 	//
 	// See: https://pkg.go.dev/go.uber.org/zap/zapcore#StringDurationEncoder
-	EncodeDuration string `json:"durationEncoder" yaml:"durationEncoder"`
+	EncodeDuration string `json:"durationEncoder" yaml:"durationEncoder"mapstructure:"durationEncoder"`
 
 	// EncodeCaller determines how callers are represented.  If unset,
 	// FullCallerEncoder is used.
 	//
 	// See: https://pkg.go.dev/go.uber.org/zap/zapcore#FullCallerEncoder
-	EncodeCaller string `json:"callerEncoder" yaml:"callerEncoder"`
+	EncodeCaller string `json:"callerEncoder" yaml:"callerEncoder"mapstructure:"callerEncoder"`
 
 	// EncodeName determines how logger names are represented.  If unset,
 	// FullNameEncoder is used.
 	//
 	// See: https://pkg.go.dev/go.uber.org/zap/zapcore#FullNameEncoder
-	EncodeName string `json:"nameEncoder" yaml:"nameEncoder"`
+	EncodeName string `json:"nameEncoder" yaml:"nameEncoder"mapstructure:"nameEncoder"`
 
 	// Configures the field separator used by the console encoder. Defaults
 	// to tab.
