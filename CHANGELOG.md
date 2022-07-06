@@ -6,9 +6,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [v0.1.6]
+
+### Fixed
+- levelEncoder, timeEncoder, durationEncoder, callerEncoder, nameEncoder marshalling
+  due to upstream viper change to support mapstructure.
 ### Added
-- Bootstrapping a zap logger for a fx application, including the fxevent.Logger
-- Deprecated Buffer and CaptureCore
+- Bootstrapping a zap logger for a fx application, including the fxevent.Logger.
+- SyncOnShutdown added enabling sync of the logs prior to app shutting down.
+### Deprecated
+- Deprecated Buffer and CaptureCore.
+### Changed
+- Dependencies have been updated.
 
 ## [v0.1.5]
 
@@ -32,7 +41,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [v0.1.0]
 - First release
 
-[Unreleased]: https://github.com/xmidt-org/sallust/compare/v0.1.5..HEAD
+[Unreleased]: https://github.com/xmidt-org/sallust/compare/v0.1.6..HEAD
+[v0.1.6]: https://github.com/xmidt-org/sallust/compare/0.1.5...v0.1.6
 [v0.1.5]: https://github.com/xmidt-org/sallust/compare/0.1.4...v0.1.5
 [v0.1.4]: https://github.com/xmidt-org/sallust/compare/0.1.3...v0.1.4
 [v0.1.3]: https://github.com/xmidt-org/sallust/compare/0.1.2...v0.1.3
