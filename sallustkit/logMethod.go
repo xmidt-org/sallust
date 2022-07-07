@@ -1,7 +1,7 @@
 package sallustkit
 
 import (
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log/level"
 	"go.uber.org/zap"
 )
 
