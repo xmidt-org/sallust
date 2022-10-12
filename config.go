@@ -86,19 +86,19 @@ type EncoderConfig struct {
 	// StringDurationEncoder is used.
 	//
 	// See: https://pkg.go.dev/go.uber.org/zap/zapcore#StringDurationEncoder
-	EncodeDuration string `json:"durationEncoder" yaml:"durationEncoder"mapstructure:"durationEncoder"`
+	EncodeDuration string `json:"durationEncoder" yaml:"durationEncoder" mapstructure:"durationEncoder"`
 
 	// EncodeCaller determines how callers are represented.  If unset,
 	// FullCallerEncoder is used.
 	//
 	// See: https://pkg.go.dev/go.uber.org/zap/zapcore#FullCallerEncoder
-	EncodeCaller string `json:"callerEncoder" yaml:"callerEncoder"mapstructure:"callerEncoder"`
+	EncodeCaller string `json:"callerEncoder" yaml:"callerEncoder" mapstructure:"callerEncoder"`
 
 	// EncodeName determines how logger names are represented.  If unset,
 	// FullNameEncoder is used.
 	//
 	// See: https://pkg.go.dev/go.uber.org/zap/zapcore#FullNameEncoder
-	EncodeName string `json:"nameEncoder" yaml:"nameEncoder"mapstructure:"nameEncoder"`
+	EncodeName string `json:"nameEncoder" yaml:"nameEncoder" mapstructure:"nameEncoder"`
 
 	// Configures the field separator used by the console encoder. Defaults
 	// to tab.

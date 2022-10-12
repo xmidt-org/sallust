@@ -169,7 +169,7 @@ func testNewLumberjackSinkSuccess(t *testing.T) {
 			actual, ok := s.(Lumberjack)
 			require.True(ok)
 
-			// we only want to compare the public fields, so use JSON marshalling as a filter
+			// we only want to compare the public fields, so use JSON misspelling as a filter
 			expectedJSON, err := json.Marshal(record.expected)
 			require.NoError(err)
 
