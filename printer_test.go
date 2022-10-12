@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest"
 )
 
 // exactLevelEnabler is used to allow only (1) particular level of logging.
@@ -50,7 +51,7 @@ func testPrinterPrintf(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var (
 				assert = assert.New(t)
-				buffer Buffer
+				buffer zaptest.Buffer
 				core   = zapcore.NewCore(
 					zapcore.NewJSONEncoder(zapcore.EncoderConfig{
 						MessageKey:  "msg",
@@ -104,7 +105,7 @@ func testPrinterPrint(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var (
 				assert = assert.New(t)
-				buffer Buffer
+				buffer zaptest.Buffer
 				core   = zapcore.NewCore(
 					zapcore.NewJSONEncoder(zapcore.EncoderConfig{
 						MessageKey:  "msg",

@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest"
 )
 
 func assertZapcoreEncoderConfigDefaults(assert *assert.Assertions, zec zapcore.EncoderConfig) {
@@ -231,7 +232,7 @@ func testConfigBuildSimple(t *testing.T) {
 		assert  = assert.New(t)
 		require = require.New(t)
 
-		output Buffer
+		output zaptest.Buffer
 
 		c = Config{
 			Development: true,
