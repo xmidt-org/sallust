@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [v0.1.6]
 
 ### Fixed
-- levelEncoder, timeEncoder, durationEncoder, callerEncoder, nameEncoder marshalling
+- levelEncoder, timeEncoder, durationEncoder, callerEncoder, nameEncoder marshaling
   due to upstream viper change to support mapstructure.
 ### Added
 - Bootstrapping a zap logger for a fx application, including the fxevent.Logger.
