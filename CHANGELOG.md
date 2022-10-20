@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- [Migrate Useful webpa-common/logging Utilities #37](https://github.com/xmidt-org/sallust/issues/37)
+- [Enable & Fix Linter #36](https://github.com/xmidt-org/sallust/issues/36)
 
 ## [v0.1.6]
 
