@@ -51,13 +51,10 @@ func TestRequestInfo(t *testing.T) {
 	kv := RequestInfo(nil, request)
 
 	require.NotNil(kv)
-	require.Len(kv, 6)
-	assert.Equal(requestMethodKey, kv[0])
-	assert.Equal("GET", kv[1])
-	assert.Equal(requestURIKey, kv[2])
-	assert.Equal("/test/foo/bar", kv[3])
-	assert.Equal(remoteAddrKey, kv[4])
-	assert.Equal("127.0.0.1:1234", kv[5])
+	require.Len(kv, 3)
+	assert.True(kv[0].Equals(zap.String(requestMethodKey, "GET")))
+	assert.True(kv[1].Equals(zap.String(requestURIKey, "/test/foo/bar")))
+	assert.True(kv[2].Equals(zap.String(remoteAddrKey, "127.0.0.1:1234")))
 }
 
 func testHeaderMissing(t *testing.T) {
@@ -67,9 +64,8 @@ func testHeaderMissing(t *testing.T) {
 	kv := Header("X-Test", "key")(nil, request)
 
 	require.NotNil(kv)
-	require.Len(kv, 2)
-	assert.Equal("key", kv[0])
-	assert.Equal("", kv[1])
+	require.Len(kv, 1)
+	assert.True(kv[0].Equals(zap.String("key", "")))
 }
 
 func testHeaderSingleValue(t *testing.T) {
@@ -80,9 +76,8 @@ func testHeaderSingleValue(t *testing.T) {
 	request.Header.Set("X-Test", "value")
 	kv := Header("X-Test", "key")(nil, request)
 	require.NotNil(kv)
-	require.Len(kv, 2)
-	assert.Equal("key", kv[0])
-	assert.Equal("value", kv[1])
+	require.Len(kv, 1)
+	assert.True(kv[0].Equals(zap.String("key", "value")))
 }
 
 func testHeaderMultiValue(t *testing.T) {
@@ -94,9 +89,8 @@ func testHeaderMultiValue(t *testing.T) {
 	request.Header.Add("X-Test", "value2")
 	kv := Header("X-Test", "key")(nil, request)
 	require.NotNil(kv)
-	require.Len(kv, 2)
-	assert.Equal("key", kv[0])
-	assert.Equal([]string{"value1", "value2"}, kv[1])
+	require.Len(kv, 1)
+	assert.True(kv[0].Equals(zap.Strings("key", []string{"value1", "value2"})))
 }
 
 func TestHeader(t *testing.T) {
