@@ -33,7 +33,7 @@ func GetDefault(r *http.Request, def *zap.Logger) *zap.Logger {
 	return sallust.GetDefault(r.Context(), def)
 }
 
-// SetLogger produces a go-kit RequestFunc that inserts a go-kit Logger into the context.
+// SetLogger produces a zap RequestFunc that inserts a zap Logger into the context.
 // Zero or more LoggerFuncs can be provided to added key/values.  Note that nothing is added to
 // the base logger by default.  If no LoggerFuncs are supplied, the base Logger is added to the
 // context as is.  In particular, RequestInfo must be used to inject the request method, uri, etc.
