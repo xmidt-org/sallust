@@ -15,12 +15,12 @@ import (
 // the new slice.
 type LoggerFunc func([]zap.Field, *http.Request) []zap.Field
 
-func NewTestLogger() (*bytes.Buffer, *zap.Logger) {
-	b := &bytes.Buffer{}
+func NewTestLogger(level zapcore.Level) (*bytes.Buffer, *zap.Logger) {
+	b := new(bytes.Buffer)
 	return b, zap.New(zapcore.NewCore(
 		zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
 		zap.CombineWriteSyncers(os.Stderr, zapcore.AddSync(b)),
-		zapcore.InfoLevel,
+		level,
 	))
 }
 

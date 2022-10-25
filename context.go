@@ -10,6 +10,10 @@ import (
 // within a context.Context instance
 type contextKey struct{}
 
+// GetLoggerFunc is the function used to get a request-specific logger from
+// its context.
+type GetLoggerFunc func(context.Context) *zap.Logger
+
 // defaultLogger is used when no logger exists in the context
 var defaultLogger *zap.Logger = zap.NewNop()
 

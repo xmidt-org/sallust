@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/xmidt-org/sallust"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func TestWith(t *testing.T) {
@@ -125,7 +126,7 @@ func testSetLoggerCustom(t *testing.T) {
 		httptest.NewRequest("GET", "/test/uri", nil),
 		variables,
 	)
-	verify, base := sallust.NewTestLogger()
+	verify, base := sallust.NewTestLogger(zapcore.InfoLevel)
 
 	request.RemoteAddr = "10.0.0.1:7777"
 	request.Header.Set("X-Test", "header value")
