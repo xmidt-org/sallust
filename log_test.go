@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap/zapcore"
 )
 
 func TestNewServerLogger(t *testing.T) {
@@ -12,7 +13,7 @@ func TestNewServerLogger(t *testing.T) {
 	sn := "serverName"
 	require := require.New(t)
 	assert := assert.New(t)
-	verify, logger := NewTestLogger()
+	verify, logger := NewTestLogger(zapcore.InfoLevel)
 	l := NewServerLogger(sn, logger)
 	require.NotNil(l)
 	l.Print(testLog)
