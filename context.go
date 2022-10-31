@@ -66,3 +66,13 @@ func GetDefault(ctx context.Context, def *zap.Logger) *zap.Logger {
 
 	return Default()
 }
+
+// GetDefaultLogger returns the default logger, which doesn't do anything.
+func GetDefaultLogger(_ context.Context) *zap.Logger {
+	return Default()
+}
+
+// GetNilLogger returns nil.
+func GetNilLogger(_ context.Context) *zap.Logger {
+	return nil
+}
