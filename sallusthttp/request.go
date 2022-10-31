@@ -16,7 +16,11 @@ const (
 )
 
 // With associates a zap.Logger with the given request
-func With(parent *http.Request, logger *zap.Logger) *http.Request {
+func With(parent *http.Request, logger *zap.Logger, b ...Builder) *http.Request {
+	for _, f := range b {
+		logger = f(parent, logger)
+	}
+
 	return parent.WithContext(
 		sallust.With(parent.Context(), logger),
 	)
