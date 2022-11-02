@@ -8,14 +8,17 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func NewConnStateLogger(logger *zap.Logger, serverName string, lvl zapcore.Level) func(net.Conn, http.ConnState) {
+func NewConnStateLogger(logger *zap.Logger, lvl zapcore.Level, fs ...zap.Field) func(net.Conn, http.ConnState) {
 	return func(c net.Conn, cs http.ConnState) {
+		fs = append(fs, zap.String("connState", cs.String()))
+		if addr := c.LocalAddr(); addr != nil {
+			fs = append(fs, zap.String("localAddress", addr.String()))
+
+		}
 		logger.Log(
 			lvl,
 			"connState",
-			zap.String("serverName", serverName),
-			zap.String("localAddress", c.LocalAddr().String()),
-			zap.String("state", cs.String()),
+			fs...,
 		)
 	}
 }
