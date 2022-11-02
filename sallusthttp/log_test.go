@@ -28,9 +28,6 @@ func assertConnState(assert *assert.Assertions, verify *bytes.Buffer, connState 
 		assert.NotPanics(func() {
 			connState(conn1, http.StateNew)
 		})
-		assert.NotPanics(func() {
-			connState(conn1, http.StateNew)
-		})
 		if verify != nil {
 			assertBufferContains(assert, verify, conn1.LocalAddr().String(), http.StateNew.String())
 		}
@@ -42,7 +39,7 @@ func TestNewConnStateLogger(t *testing.T) {
 		assert    = assert.New(t)
 		require   = require.New(t)
 		v, l      = sallust.NewTestLogger(zap.DebugLevel)
-		connState = NewConnStateLogger(l, "serverName", zap.DebugLevel)
+		connState = NewConnStateLogger(l, zap.DebugLevel)
 	)
 
 	require.NotNil(connState)
