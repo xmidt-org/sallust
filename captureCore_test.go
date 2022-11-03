@@ -14,7 +14,8 @@ func TestCaptureCore(t *testing.T) {
 	var (
 		assert  = assert.New(t)
 		require = require.New(t)
-		enc     = zapcore.NewJSONEncoder(zapcore.EncoderConfig{
+		// nolint:staticcheck
+		enc = zapcore.NewJSONEncoder(zapcore.EncoderConfig{
 			MessageKey:  "msg",
 			EncodeLevel: zapcore.LowercaseLevelEncoder,
 		})

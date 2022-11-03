@@ -6,7 +6,7 @@ import (
 )
 
 // LogMethod refers to a method of a zap Logger.  Used to define
-// which method should received go-kit levelled logging, e.g. Error, Info, etc.
+// which method should received go-kit leveled logging, e.g. Error, Info, etc.
 type LogMethod func(string, ...zap.Field)
 
 // LogMethodFor returns the method of a zap Logger that corresponds to

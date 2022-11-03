@@ -1,7 +1,7 @@
 package sallustkit
 
 import (
-	"io/ioutil"
+	"io"
 
 	"github.com/stretchr/testify/suite"
 	"github.com/xmidt-org/sallust"
@@ -13,7 +13,7 @@ import (
 // the test setup logic.
 type GokitTestSuite struct {
 	suite.Suite
-
+	// nolint:staticcheck
 	core      *sallust.CaptureCore
 	zapLogger *zap.Logger
 }
@@ -32,7 +32,7 @@ func (suite *GokitTestSuite) SetupTest() {
 
 	suite.core = sallust.NewCaptureCore(
 		zapcore.NewJSONEncoder(encoderConfig),
-		zapcore.AddSync(ioutil.Discard),
+		zapcore.AddSync(io.Discard),
 		zap.DebugLevel, // turn on everything
 	)
 
