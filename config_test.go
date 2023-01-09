@@ -1,6 +1,7 @@
 package sallust
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -231,7 +232,7 @@ func testConfigBuildSimple(t *testing.T) {
 		assert  = assert.New(t)
 		require = require.New(t)
 
-		output Buffer
+		buffer bytes.Buffer
 
 		c = Config{
 			Development: true,
@@ -247,7 +248,7 @@ func testConfigBuildSimple(t *testing.T) {
 		zap.WrapCore(func(zapcore.Core) zapcore.Core {
 			return zapcore.NewCore(
 				zapcore.NewJSONEncoder(zec),
-				&output,
+				zapcore.AddSync(&buffer),
 				zapcore.DebugLevel,
 			)
 		}),
@@ -256,7 +257,7 @@ func testConfigBuildSimple(t *testing.T) {
 	require.NoError(err)
 	require.NotNil(l)
 	l.Info("test message")
-	assert.Greater(output.Len(), 0)
+	assert.Greater(buffer.Len(), 0)
 }
 
 func testConfigBuild(t *testing.T) {
