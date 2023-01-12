@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/gorilla/mux v1.8.0
 	github.com/stretchr/testify v1.8.1
-	go.uber.org/fx v1.19.0
+	go.uber.org/fx v1.19.1
 	go.uber.org/zap v1.24.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
