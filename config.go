@@ -1,7 +1,10 @@
 package sallust
 
 import (
+	"io/fs"
+	"net/url"
 	"os"
+	"path/filepath"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -270,6 +273,11 @@ type Config struct {
 	// expansion, even with environment variables, is performed.
 	DisablePathExpansion bool `json:"disablePathExpansion" yaml:"disablePathExpansion"`
 
+	// Permissions is the optional nix-style file permissions to use when creating log files.
+	// If supplied, this value must be parseable via ParsePermissions.  If this field is unset,
+	// zap and lumberjack will control what permissions new log files have.
+	Permissions string `json:"permissions" yaml:"permissions"`
+
 	// Mapping is an optional strategy for expanding variables in output paths.
 	// If not supplied, os.Getenv is used.
 	Mapping func(string) string `json:"-" yaml:"-"`
@@ -299,9 +307,54 @@ func applyConfigDefaults(zc *zap.Config) {
 	zc.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
 }
 
+// ensureExists makes sure the given path exists with the specified permissions.
+// If the path has already been created or if perms is 0, this function won't do anything.
+//
+// The path is treated as a URI in a similar fashion to zap.Open.
+func ensureExists(path string, perms fs.FileMode) (err error) {
+	if perms == 0 {
+		return
+	}
+
+	var f *os.File
+	defer func() {
+		if f != nil {
+			f.Close()
+		}
+	}()
+
+	switch {
+	case path == "stdout": // reserved in zap
+		fallthrough
+
+	case path == "stderr": // reserved in zap
+		break
+
+	// Windows hack:  filepath.Abs will return false outside of Windows
+	// for many paths.  This just makes sure we don't have to do a bunch
+	// of platform-specific nonsense.
+	case filepath.IsAbs(path):
+		f, err = os.OpenFile(path, os.O_CREATE|os.O_WRONLY, perms)
+
+	default:
+		var url *url.URL
+		url, err = url.Parse(path)
+		if err == nil {
+			f, err = os.OpenFile(url.Path, os.O_CREATE|os.O_WRONLY, perms)
+		}
+	}
+
+	return
+}
+
 // NewZapConfig creates a zap.Config enriched with features from these Options.
 // Primarily, this involves creating lumberjack URLs so that the registered sink
 // will create the appropriate infrastructure to do log file rotation.
+//
+// This method also enforces the Permissions field.  Any output or error path
+// will be created initially with the configured file permissions.  This allows
+// both zap's file sink and the custom lumberjack sink in this package to honor
+// custom permissions.
 func (c Config) NewZapConfig() (zc zap.Config, err error) {
 	zc = zap.Config{
 		Development:       c.Development,
@@ -334,6 +387,9 @@ func (c Config) NewZapConfig() (zc zap.Config, err error) {
 		}
 	}
 
+	var perms fs.FileMode
+	perms, err = ParsePermissions(c.Permissions)
+
 	if err == nil {
 		pt := PathTransformer{
 			Rotation: c.Rotation,
@@ -350,6 +406,16 @@ func (c Config) NewZapConfig() (zc zap.Config, err error) {
 		if err == nil {
 			zc.ErrorOutputPaths, err = ApplyTransform(pt.Transform, zc.ErrorOutputPaths...)
 		}
+	}
+
+	// Iterate over the transformed paths and ensure that any URIs that refer to
+	// files are created with relevant permissions.
+	for i := 0; err == nil && i < len(zc.OutputPaths); i++ {
+		err = ensureExists(zc.OutputPaths[i], perms)
+	}
+
+	for i := 0; err == nil && i < len(zc.ErrorOutputPaths); i++ {
+		err = ensureExists(zc.ErrorOutputPaths[i], perms)
 	}
 
 	if err == nil {
