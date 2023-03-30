@@ -16,6 +16,7 @@ func (suite *ParsePermissionsTestSuite) TestValid() {
 		value    string
 		expected fs.FileMode
 	}{
+		{value: "", expected: 0},
 		{value: "644", expected: 0644},
 		{value: "0644", expected: 0644},
 		{value: "666", expected: 0666},
@@ -37,7 +38,6 @@ func (suite *ParsePermissionsTestSuite) TestValid() {
 
 func (suite *ParsePermissionsTestSuite) TestInvalid() {
 	testCases := []string{
-		"",
 		"0",
 		"463213",
 		"900",

@@ -19,10 +19,13 @@ func accumulate(v byte, factor int, perms *fs.FileMode) (ok bool) {
 }
 
 // ParsePermissions parses a nix-style file permissions value.  The value must be a 3-digit
-// octal integer with an optional leading zero (0).  The empty string is considered to be
-// an invalid permissions value.
+// octal integer with an optional leading zero (0).  The empty string is considered to be 000.
 func ParsePermissions(v string) (perms fs.FileMode, err error) {
 	switch {
+	// allows for an unset configuration value, which means just take the underlying defaults
+	case len(v) == 0:
+		return
+
 	case len(v) < 3:
 		fallthrough
 
