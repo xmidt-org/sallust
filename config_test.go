@@ -4,44 +4,49 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-func assertZapcoreEncoderConfigDefaults(assert *assert.Assertions, zec zapcore.EncoderConfig) {
-	assert.Equal(DefaultMessageKey, zec.MessageKey)
-	assert.Equal(DefaultLevelKey, zec.LevelKey)
-	assert.Equal(DefaultTimeKey, zec.TimeKey)
-	assert.Equal(DefaultNameKey, zec.NameKey)
-	assert.Empty(zec.CallerKey)
-	assert.Empty(zec.FunctionKey)
-	assert.Empty(zec.StacktraceKey)
-	assert.NotNil(zec.EncodeLevel)
-	assert.NotNil(zec.EncodeTime)
-	assert.NotNil(zec.EncodeDuration)
-	assert.NotNil(zec.EncodeCaller)
-	assert.NotNil(zec.EncodeName)
+// ZapcoreSuite is an embeddable suite that contains common functionality
+// for the test suites involving configuration.
+type ZapcoreSuite struct {
+	suite.Suite
 }
 
-func testEncoderConfigDefaults(t *testing.T) {
+func (suite *ZapcoreSuite) assertEncoderConfigDefaults(zec zapcore.EncoderConfig) {
+	suite.Equal(DefaultMessageKey, zec.MessageKey)
+	suite.Equal(DefaultLevelKey, zec.LevelKey)
+	suite.Equal(DefaultTimeKey, zec.TimeKey)
+	suite.Equal(DefaultNameKey, zec.NameKey)
+	suite.Empty(zec.CallerKey)
+	suite.Empty(zec.FunctionKey)
+	suite.Empty(zec.StacktraceKey)
+	suite.NotNil(zec.EncodeLevel)
+	suite.NotNil(zec.EncodeTime)
+	suite.NotNil(zec.EncodeDuration)
+	suite.NotNil(zec.EncodeCaller)
+	suite.NotNil(zec.EncodeName)
+}
+
+type EncoderConfigSuite struct {
+	ZapcoreSuite
+}
+
+func (suite *EncoderConfigSuite) TestDefaults() {
 	var (
-		assert  = assert.New(t)
-		require = require.New(t)
-		ec      EncoderConfig
+		ec       EncoderConfig
+		zec, err = ec.NewZapcoreEncoderConfig()
 	)
 
-	zec, err := ec.NewZapcoreEncoderConfig()
-	require.NoError(err)
-	assertZapcoreEncoderConfigDefaults(assert, zec)
+	suite.Require().NoError(err)
+	suite.assertEncoderConfigDefaults(zec)
 }
 
-func testEncoderConfigCustom(t *testing.T) {
+func (suite *EncoderConfigSuite) TestCustom() {
 	var (
-		assert  = assert.New(t)
-		require = require.New(t)
-		ec      = EncoderConfig{
+		ec = EncoderConfig{
 			MessageKey:     "message_key",
 			LevelKey:       "level_key",
 			TimeKey:        "time_key",
@@ -58,121 +63,113 @@ func testEncoderConfigCustom(t *testing.T) {
 			LineEnding:       "foo",
 			ConsoleSeparator: "bar",
 		}
+
+		zec, err = ec.NewZapcoreEncoderConfig()
 	)
 
-	zec, err := ec.NewZapcoreEncoderConfig()
-	require.NoError(err)
+	suite.Require().NoError(err)
 
-	assert.Equal("message_key", zec.MessageKey)
-	assert.Equal("level_key", zec.LevelKey)
-	assert.Equal("time_key", zec.TimeKey)
-	assert.Equal("name_key", zec.NameKey)
-	assert.Equal("caller_key", zec.CallerKey)
-	assert.Equal("function_key", zec.FunctionKey)
-	assert.Equal("stacktrace_key", zec.StacktraceKey)
-	assert.NotNil(zec.EncodeLevel)
-	assert.NotNil(zec.EncodeTime)
-	assert.NotNil(zec.EncodeDuration)
-	assert.NotNil(zec.EncodeCaller)
-	assert.NotNil(zec.EncodeName)
+	suite.Equal("message_key", zec.MessageKey)
+	suite.Equal("level_key", zec.LevelKey)
+	suite.Equal("time_key", zec.TimeKey)
+	suite.Equal("name_key", zec.NameKey)
+	suite.Equal("caller_key", zec.CallerKey)
+	suite.Equal("function_key", zec.FunctionKey)
+	suite.Equal("stacktrace_key", zec.StacktraceKey)
+	suite.NotNil(zec.EncodeLevel)
+	suite.NotNil(zec.EncodeTime)
+	suite.NotNil(zec.EncodeDuration)
+	suite.NotNil(zec.EncodeCaller)
+	suite.NotNil(zec.EncodeName)
 
-	assert.Equal("foo", zec.LineEnding)
-	assert.Equal("bar", zec.ConsoleSeparator)
+	suite.Equal("foo", zec.LineEnding)
+	suite.Equal("bar", zec.ConsoleSeparator)
 }
 
-func testEncoderConfigDisableDefaultKeys(t *testing.T) {
+func (suite *EncoderConfigSuite) TestDisableDefaultKeys() {
 	var (
-		assert  = assert.New(t)
-		require = require.New(t)
-		ec      = EncoderConfig{
+		ec = EncoderConfig{
 			DisableDefaultKeys: true,
 		}
+
+		zec, err = ec.NewZapcoreEncoderConfig()
 	)
 
-	zec, err := ec.NewZapcoreEncoderConfig()
-	require.NoError(err)
+	suite.Require().NoError(err)
 
-	assert.Empty(zec.MessageKey)
-	assert.Empty(zec.LevelKey)
-	assert.Empty(zec.TimeKey)
-	assert.Empty(zec.NameKey)
-	assert.Empty(zec.CallerKey)
-	assert.Empty(zec.FunctionKey)
-	assert.Empty(zec.StacktraceKey)
-	assert.NotNil(zec.EncodeLevel)
-	assert.NotNil(zec.EncodeTime)
-	assert.NotNil(zec.EncodeDuration)
-	assert.NotNil(zec.EncodeCaller)
-	assert.NotNil(zec.EncodeName)
+	suite.Empty(zec.MessageKey)
+	suite.Empty(zec.LevelKey)
+	suite.Empty(zec.TimeKey)
+	suite.Empty(zec.NameKey)
+	suite.Empty(zec.CallerKey)
+	suite.Empty(zec.FunctionKey)
+	suite.Empty(zec.StacktraceKey)
+	suite.NotNil(zec.EncodeLevel)
+	suite.NotNil(zec.EncodeTime)
+	suite.NotNil(zec.EncodeDuration)
+	suite.NotNil(zec.EncodeCaller)
+	suite.NotNil(zec.EncodeName)
 }
 
 func TestEncoderConfig(t *testing.T) {
-	t.Run("Defaults", testEncoderConfigDefaults)
-	t.Run("Custom", testEncoderConfigCustom)
-	t.Run("DisableDefaultKeys", testEncoderConfigDisableDefaultKeys)
+	suite.Run(t, new(EncoderConfigSuite))
 }
 
-func testConfigNewZapConfigDefaults(t *testing.T) {
-	var (
-		assert  = assert.New(t)
-		require = require.New(t)
+type ConfigSuite struct {
+	ZapcoreSuite
+}
 
-		c Config
-	)
+func (suite *ConfigSuite) TestDefaults() {
+	var c Config
 
 	zc, err := c.NewZapConfig()
-	require.NoError(err)
+	suite.Require().NoError(err)
 
-	assert.Equal(zapcore.InfoLevel, zc.Level.Level())
-	assert.False(zc.Development)
-	assert.False(zc.DisableCaller)
-	assert.False(zc.DisableStacktrace)
-	assert.Equal("json", zc.Encoding)
-	assert.Empty(zc.OutputPaths)
-	assert.Equal([]string{"stderr"}, zc.ErrorOutputPaths)
-	assert.Nil(zc.Sampling)
-	assert.Empty(zc.InitialFields)
+	suite.Equal(zapcore.InfoLevel, zc.Level.Level())
+	suite.False(zc.Development)
+	suite.False(zc.DisableCaller)
+	suite.False(zc.DisableStacktrace)
+	suite.Equal("json", zc.Encoding)
+	suite.Empty(zc.OutputPaths)
+	suite.Equal([]string{"stderr"}, zc.ErrorOutputPaths)
+	suite.Nil(zc.Sampling)
+	suite.Empty(zc.InitialFields)
 
 	zec, err := c.EncoderConfig.NewZapcoreEncoderConfig()
-	require.NoError(err)
-	assertZapcoreEncoderConfigDefaults(assert, zec)
+	suite.Require().NoError(err)
+	suite.assertEncoderConfigDefaults(zec)
 }
 
-func testConfigNewZapConfigCustom(t *testing.T) {
-	var (
-		assert  = assert.New(t)
-		require = require.New(t)
-
-		c = Config{
-			Level:             "debug",
-			Development:       true,
-			DisableCaller:     true,
-			DisableStacktrace: true,
-			Sampling: &zap.SamplingConfig{
-				Initial:    1,
-				Thereafter: 10,
-			},
-			Encoding:         "console",
-			OutputPaths:      []string{"/var/log/test/test.log"},
-			ErrorOutputPaths: []string{"stdout"},
-			InitialFields: map[string]interface{}{
-				"name":  "value",
-				"slice": []string{"1", "2"},
-			},
-		}
-	)
+func (suite *ConfigSuite) TestCustom() {
+	c := Config{
+		Level:             "debug",
+		Development:       true,
+		DisableCaller:     true,
+		DisableStacktrace: true,
+		Sampling: &zap.SamplingConfig{
+			Initial:    1,
+			Thereafter: 10,
+		},
+		Encoding:         "console",
+		OutputPaths:      []string{"/var/log/test/test.log"},
+		ErrorOutputPaths: []string{"stdout"},
+		InitialFields: map[string]interface{}{
+			"name":  "value",
+			"slice": []string{"1", "2"},
+		},
+	}
 
 	zc, err := c.NewZapConfig()
-	require.NoError(err)
+	suite.Require().NoError(err)
 
-	assert.Equal(zapcore.DebugLevel, zc.Level.Level())
-	assert.True(zc.Development)
-	assert.True(zc.DisableCaller)
-	assert.True(zc.DisableStacktrace)
-	assert.Equal("console", zc.Encoding)
-	assert.Equal([]string{"/var/log/test/test.log"}, zc.OutputPaths)
-	assert.Equal([]string{"stdout"}, zc.ErrorOutputPaths)
-	assert.Equal(
+	suite.Equal(zapcore.DebugLevel, zc.Level.Level())
+	suite.True(zc.Development)
+	suite.True(zc.DisableCaller)
+	suite.True(zc.DisableStacktrace)
+	suite.Equal("console", zc.Encoding)
+	suite.Equal([]string{"/var/log/test/test.log"}, zc.OutputPaths)
+	suite.Equal([]string{"stdout"}, zc.ErrorOutputPaths)
+	suite.Equal(
 		zap.SamplingConfig{
 			Initial:    1,
 			Thereafter: 10,
@@ -180,7 +177,7 @@ func testConfigNewZapConfigCustom(t *testing.T) {
 		*zc.Sampling,
 	)
 
-	assert.Equal(
+	suite.Equal(
 		map[string]interface{}{
 			"name":  "value",
 			"slice": []string{"1", "2"},
@@ -189,49 +186,35 @@ func testConfigNewZapConfigCustom(t *testing.T) {
 	)
 
 	zec, err := c.EncoderConfig.NewZapcoreEncoderConfig()
-	require.NoError(err)
-	assertZapcoreEncoderConfigDefaults(assert, zec)
+	suite.Require().NoError(err)
+	suite.assertEncoderConfigDefaults(zec)
 }
 
-func testConfigNewZapConfigDevelopmentDefaults(t *testing.T) {
-	var (
-		assert  = assert.New(t)
-		require = require.New(t)
-
-		c = Config{
-			Development: true,
-		}
-	)
+func (suite *ConfigSuite) TestDevelopmentDefaults() {
+	c := Config{
+		Development: true,
+	}
 
 	zc, err := c.NewZapConfig()
-	require.NoError(err)
+	suite.Require().NoError(err)
 
-	assert.Equal(zapcore.InfoLevel, zc.Level.Level())
-	assert.True(zc.Development)
-	assert.False(zc.DisableCaller)
-	assert.False(zc.DisableStacktrace)
-	assert.Equal("json", zc.Encoding)
-	assert.Equal([]string{"stdout"}, zc.OutputPaths)
-	assert.Equal([]string{"stderr"}, zc.ErrorOutputPaths)
-	assert.Nil(zc.Sampling)
-	assert.Empty(zc.InitialFields)
+	suite.Equal(zapcore.InfoLevel, zc.Level.Level())
+	suite.True(zc.Development)
+	suite.False(zc.DisableCaller)
+	suite.False(zc.DisableStacktrace)
+	suite.Equal("json", zc.Encoding)
+	suite.Equal([]string{"stdout"}, zc.OutputPaths)
+	suite.Equal([]string{"stderr"}, zc.ErrorOutputPaths)
+	suite.Nil(zc.Sampling)
+	suite.Empty(zc.InitialFields)
 
 	zec, err := c.EncoderConfig.NewZapcoreEncoderConfig()
-	require.NoError(err)
-	assertZapcoreEncoderConfigDefaults(assert, zec)
+	suite.Require().NoError(err)
+	suite.assertEncoderConfigDefaults(zec)
 }
 
-func testConfigNewZapConfig(t *testing.T) {
-	t.Run("Defaults", testConfigNewZapConfigDefaults)
-	t.Run("Custom", testConfigNewZapConfigCustom)
-	t.Run("DevelopmentDefaults", testConfigNewZapConfigDevelopmentDefaults)
-}
-
-func testConfigBuildSimple(t *testing.T) {
+func (suite *ConfigSuite) TestBuildSimple() {
 	var (
-		assert  = assert.New(t)
-		require = require.New(t)
-
 		buffer bytes.Buffer
 
 		c = Config{
@@ -242,7 +225,7 @@ func testConfigBuildSimple(t *testing.T) {
 	// create an encoder config to replace the one created by the zap package
 	// so that we can run assertions
 	zec, err := EncoderConfig{}.NewZapcoreEncoderConfig()
-	require.NoError(err)
+	suite.Require().NoError(err)
 
 	l, err := c.Build(
 		zap.WrapCore(func(zapcore.Core) zapcore.Core {
@@ -254,17 +237,12 @@ func testConfigBuildSimple(t *testing.T) {
 		}),
 	)
 
-	require.NoError(err)
-	require.NotNil(l)
+	suite.Require().NoError(err)
+	suite.Require().NotNil(l)
 	l.Info("test message")
-	assert.Greater(buffer.Len(), 0)
-}
-
-func testConfigBuild(t *testing.T) {
-	t.Run("Simple", testConfigBuildSimple)
+	suite.Greater(buffer.Len(), 0)
 }
 
 func TestConfig(t *testing.T) {
-	t.Run("NewZapConfig", testConfigNewZapConfig)
-	t.Run("Build", testConfigBuild)
+	suite.Run(t, new(ConfigSuite))
 }
