@@ -2,6 +2,9 @@ package sallust
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -13,8 +16,12 @@ import (
 // for the test suites involving configuration.
 type ZapcoreSuite struct {
 	suite.Suite
+
+	logDirectory string
 }
 
+// assertEncoderConfigDefaults runs standard assertions against a zapcore.EncoderConfig
+// to verify that the sallust defaults were applied.
 func (suite *ZapcoreSuite) assertEncoderConfigDefaults(zec zapcore.EncoderConfig) {
 	suite.Equal(DefaultMessageKey, zec.MessageKey)
 	suite.Equal(DefaultLevelKey, zec.LevelKey)
@@ -28,6 +35,35 @@ func (suite *ZapcoreSuite) assertEncoderConfigDefaults(zec zapcore.EncoderConfig
 	suite.NotNil(zec.EncodeDuration)
 	suite.NotNil(zec.EncodeCaller)
 	suite.NotNil(zec.EncodeName)
+}
+
+func (suite *ZapcoreSuite) assertLogFilePermissions(fileName string, expected os.FileMode) {
+	fi, err := os.Stat(filepath.Join(suite.logDirectory, fileName))
+	suite.Require().NoError(err)
+
+	// skip permissions check on Windows
+	if runtime.GOOS != "windows" {
+		actual := fi.Mode().Perm()
+
+		suite.Equalf(
+			expected,
+			actual,
+			"Expected permissions [%s] do not match [%s]",
+			expected,
+			actual,
+		)
+	}
+}
+
+func (suite *ZapcoreSuite) BeforeTest(suiteName, testName string) {
+	var err error
+	suite.logDirectory, err = os.MkdirTemp("", "*-"+suiteName+"-"+testName)
+	suite.Require().NoError(err)
+	suite.T().Logf("using test log directory: %s", suite.logDirectory)
+}
+
+func (suite *ZapcoreSuite) TearDownSuite() {
+	os.RemoveAll(suite.logDirectory)
 }
 
 type EncoderConfigSuite struct {
@@ -241,6 +277,31 @@ func (suite *ConfigSuite) TestBuildSimple() {
 	suite.Require().NotNil(l)
 	l.Info("test message")
 	suite.Greater(buffer.Len(), 0)
+}
+
+func (suite *ConfigSuite) TestBuildWithPermissions() {
+	c := Config{
+		OutputPaths: []string{
+			"stdout",
+			"stderr",
+			filepath.Join(suite.logDirectory, "test.log"),
+			"file://" + filepath.Join(suite.logDirectory, "test-uri.log"),
+		},
+		ErrorOutputPaths: []string{
+			"stdout",
+			"stderr",
+			filepath.Join(suite.logDirectory, "test-error.log"),
+			"file://" + filepath.Join(suite.logDirectory, "test-error-uri.log"),
+		},
+		Permissions: "0744",
+	}
+
+	_, err := c.Build()
+	suite.Require().NoError(err)
+	suite.assertLogFilePermissions("test.log", 0744)
+	suite.assertLogFilePermissions("test-uri.log", 0744)
+	suite.assertLogFilePermissions("test-uri.log", 0744)
+	suite.assertLogFilePermissions("test-error-uri.log", 0744)
 }
 
 func TestConfig(t *testing.T) {
