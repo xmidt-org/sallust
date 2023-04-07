@@ -26,6 +26,12 @@ const (
 	// DefaultNameKey is the default value for EncoderConfig.NameKey.  This value
 	// is not used if EncoderConfig.DisableDefaultKeys is true.
 	DefaultNameKey = "name"
+
+	// Stdout is the reserved zap output path name that corresponds to stdout.
+	Stdout = "stdout"
+
+	// Stderr is the reserved zap output path name that corresponds to stderr.
+	Stderr = "stderr"
 )
 
 // EncoderConfig is an analog to zap.EncoderConfig.  This type is friendlier
@@ -253,7 +259,7 @@ type Config struct {
 	OutputPaths []string `json:"outputPaths" yaml:"outputPaths"`
 
 	// ErrorOutputPaths are the set of sinks for zap's internal messages.  This field
-	// corresponds to zap.Config.ErrorOutputPaths.  If unset, "stderr" is assumed.
+	// corresponds to zap.Config.ErrorOutputPaths.  If unset, Stderr is assumed.
 	//
 	// As with OutputPaths, environment variable references in each path are expanded
 	// unless DisablePathExpansion is true.
@@ -294,11 +300,11 @@ func applyConfigDefaults(zc *zap.Config) {
 
 	if zc.Development && len(zc.OutputPaths) == 0 {
 		// NOTE: difference from zap ... in development they send output to stderr
-		zc.OutputPaths = []string{"stdout"}
+		zc.OutputPaths = []string{Stdout}
 	}
 
 	if len(zc.ErrorOutputPaths) == 0 {
-		zc.ErrorOutputPaths = []string{"stderr"}
+		zc.ErrorOutputPaths = []string{Stderr}
 	}
 
 	// NOTE: can't compare the Level with nil very easily, so just
@@ -324,10 +330,10 @@ func ensureExists(path string, perms fs.FileMode) (err error) {
 	}()
 
 	switch {
-	case path == "stdout": // reserved in zap
+	case path == Stdout:
 		fallthrough
 
-	case path == "stderr": // reserved in zap
+	case path == Stderr:
 		break
 
 	// Windows hack:  filepath.Abs will return false outside of Windows

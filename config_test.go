@@ -167,7 +167,7 @@ func (suite *ConfigSuite) TestDefaults() {
 	suite.False(zc.DisableStacktrace)
 	suite.Equal("json", zc.Encoding)
 	suite.Empty(zc.OutputPaths)
-	suite.Equal([]string{"stderr"}, zc.ErrorOutputPaths)
+	suite.Equal([]string{Stderr}, zc.ErrorOutputPaths)
 	suite.Nil(zc.Sampling)
 	suite.Empty(zc.InitialFields)
 
@@ -188,7 +188,7 @@ func (suite *ConfigSuite) TestCustom() {
 		},
 		Encoding:         "console",
 		OutputPaths:      []string{"/var/log/test/test.log"},
-		ErrorOutputPaths: []string{"stdout"},
+		ErrorOutputPaths: []string{Stdout},
 		InitialFields: map[string]interface{}{
 			"name":  "value",
 			"slice": []string{"1", "2"},
@@ -204,7 +204,7 @@ func (suite *ConfigSuite) TestCustom() {
 	suite.True(zc.DisableStacktrace)
 	suite.Equal("console", zc.Encoding)
 	suite.Equal([]string{"/var/log/test/test.log"}, zc.OutputPaths)
-	suite.Equal([]string{"stdout"}, zc.ErrorOutputPaths)
+	suite.Equal([]string{Stdout}, zc.ErrorOutputPaths)
 	suite.Equal(
 		zap.SamplingConfig{
 			Initial:    1,
@@ -239,8 +239,8 @@ func (suite *ConfigSuite) TestDevelopmentDefaults() {
 	suite.False(zc.DisableCaller)
 	suite.False(zc.DisableStacktrace)
 	suite.Equal("json", zc.Encoding)
-	suite.Equal([]string{"stdout"}, zc.OutputPaths)
-	suite.Equal([]string{"stderr"}, zc.ErrorOutputPaths)
+	suite.Equal([]string{Stdout}, zc.OutputPaths)
+	suite.Equal([]string{Stderr}, zc.ErrorOutputPaths)
 	suite.Nil(zc.Sampling)
 	suite.Empty(zc.InitialFields)
 
@@ -282,14 +282,14 @@ func (suite *ConfigSuite) TestBuildSimple() {
 func (suite *ConfigSuite) TestBuildWithPermissions() {
 	c := Config{
 		OutputPaths: []string{
-			"stdout",
-			"stderr",
+			Stdout,
+			Stderr,
 			filepath.Join(suite.logDirectory, "test.log"),
 			"file://" + filepath.Join(suite.logDirectory, "test-uri.log"),
 		},
 		ErrorOutputPaths: []string{
-			"stdout",
-			"stderr",
+			Stdout,
+			Stderr,
 			filepath.Join(suite.logDirectory, "test-error.log"),
 			"file://" + filepath.Join(suite.logDirectory, "test-error-uri.log"),
 		},
