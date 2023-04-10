@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- [Configurable file permissions #51](https://github.com/xmidt-org/sallust/issues/51)
+
 ## [v0.2.1]
 - [Pruned deprecated code #43](https://github.com/xmidt-org/sallust/pull/43)
 
