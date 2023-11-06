@@ -3,7 +3,7 @@ module github.com/xmidt-org/sallust
 go 1.18
 
 require (
-	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/mux v1.8.1
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/fx v1.20.1
 	go.uber.org/zap v1.26.0
