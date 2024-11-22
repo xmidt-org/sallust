@@ -11,9 +11,9 @@ var (
 	stringType = reflect.TypeOf("")
 
 	levelType          = reflect.TypeOf(zapcore.Level(0))
-	levelPtrType       = reflect.PtrTo(levelType)
+	levelPtrType       = reflect.PointerTo(levelType)
 	atomicLevelType    = reflect.TypeOf(zap.AtomicLevel{})
-	atomicLevelPtrType = reflect.PtrTo(atomicLevelType)
+	atomicLevelPtrType = reflect.PointerTo(atomicLevelType)
 
 	levelEncoderType    = reflect.TypeOf(zapcore.LevelEncoder(nil))
 	timeEncoderType     = reflect.TypeOf(zapcore.TimeEncoder(nil))
@@ -79,15 +79,15 @@ func decodeNameEncoder(text string) (ne zapcore.NameEncoder, err error) {
 //
 // The to type may be one of:
 //
-//   zapcore.Level
-//   *zapcore.Level
-//   zap.AtomicLevel
-//   *zap.AtomicLevel
-//   zapcore.LevelEncoder
-//   zapcore.TimeEncoder
-//   zapcore.DurationEncoder
-//   zapcore.CallerEncoder
-//   zapcore.NameEncoder
+//	zapcore.Level
+//	*zapcore.Level
+//	zap.AtomicLevel
+//	*zap.AtomicLevel
+//	zapcore.LevelEncoder
+//	zapcore.TimeEncoder
+//	zapcore.DurationEncoder
+//	zapcore.CallerEncoder
+//	zapcore.NameEncoder
 //
 // The UnmarshalText method of the to type is used to do the conversion.
 //
