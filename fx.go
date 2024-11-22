@@ -54,12 +54,6 @@ func WithLogger(options ...zap.Option) fx.Option {
 // SyncOnShutdown adds an fx lifecycle hook that invokes Sync on the application's logger.
 // Generally, this option should be placed as an fx.Invoke last in the set of options.
 // That ensures that log entries from other lifecycle OnStop hooks are written to log sinks.
-//
-//   fx.New(
-//     // all other options come first ...
-//
-//     sallust.SyncOnShutdown(),
-//   )
 func SyncOnShutdown() fx.Option {
 	return fx.Invoke(
 		func(logger *zap.Logger, lifecycle fx.Lifecycle) {
