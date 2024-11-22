@@ -19,20 +19,6 @@ type Middleware struct {
 
 // Decorate is a middleware function for augmenting request contexts with
 // loggers.  If next is nil, then this function decorates http.DefaultServeMux.
-//
-// This function may be used with gorilla/mux, e.g.:
-//
-//   var m Middleware
-//   m.Builders.Add(Named("myHandler"), DefaultFields)
-//   r := mux.NewRouter()
-//   r.UseMiddleware(m.Decorate)
-//   r.Handle("/", MyHandler{})
-//
-// Similarly, it can be used with packages like justinas/alice:
-//
-//   var m Middleware
-//   m.Builders.Add(Named("myHandler"), DefaultFields)
-//   alice.New(m.Decorate).Then(MyHandler{})
 func (m Middleware) Decorate(next http.Handler) http.Handler {
 	// keep a similar behavior to justinas/alice:
 	if next == nil {

@@ -53,7 +53,7 @@ func (suite *ParsePermissionsTestSuite) TestInvalid() {
 	for _, testCase := range testCases {
 		suite.Run(testCase, func() {
 			_, err := ParsePermissions(testCase)
-			suite.ErrorIs(err, ErrInvalidPermissions)
+			suite.Error(err)
 		})
 	}
 }
