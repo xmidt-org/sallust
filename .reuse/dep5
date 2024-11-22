@@ -7,6 +7,10 @@ Files: NOTICE
 Copyright: SPDX-FileCopyrightText: 2024 Comcast Cable Communications Management, LLC
 License: Apache-2.0
 
+Files: AUTHORS
+Copyright: SPDX-FileCopyrightText: 2024 Comcast Cable Communications Management, LLC
+License: Apache-2.0
+
 Files: .gitignore
 Copyright: SPDX-FileCopyrightText: 2024 Comcast Cable Communications Management, LLC
 License: Apache-2.0
