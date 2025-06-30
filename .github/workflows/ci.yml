@@ -32,7 +32,6 @@ jobs:
         .release/docker
         LICENSE
         NOTICE
-      copyright-skip: false
       style-skip:     false
       release-type:   library
       yaml-lint-skip: false
