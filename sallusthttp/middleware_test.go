@@ -52,7 +52,7 @@ func testMiddlewareDecorate(t *testing.T) {
 
 			assert.Equal(1, logs.Len())
 			for _, le := range logs.TakeAll() {
-				assert.Equal("message", le.Entry.Message)
+				assert.Equal("message", le.Message)
 				assert.Equal(
 					[]zapcore.Field{zap.String("foo", "bar")},
 					le.Context,
@@ -92,7 +92,7 @@ func testMiddlewareDecorateFunc(t *testing.T) {
 
 			assert.Equal(1, logs.Len())
 			for _, le := range logs.TakeAll() {
-				assert.Equal("message", le.Entry.Message)
+				assert.Equal("message", le.Message)
 				assert.Equal(
 					[]zapcore.Field{zap.String("foo", "bar")},
 					le.Context,

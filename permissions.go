@@ -21,11 +21,11 @@ func ParsePermissions(v string) (perms fs.FileMode, err error) {
 		if err == nil {
 			perms = fs.FileMode(raw)
 		} else {
-			err = fmt.Errorf("Invalid permissions [%s]: %s", v, err)
+			err = fmt.Errorf("Invalid permissions [%s]: %s", v, err) // nolint:staticcheck
 		}
 
 	default:
-		err = fmt.Errorf("Invalid permissions [%s]: incorrect length", v)
+		err = fmt.Errorf("Invalid permissions [%s]: incorrect length", v) // nolint:staticcheck
 	}
 
 	return

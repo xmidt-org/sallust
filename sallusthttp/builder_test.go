@@ -48,7 +48,7 @@ func TestBuilders(t *testing.T) {
 	assert.Equal(1, logs.Len())
 	for _, le := range logs.TakeAll() {
 		assert.ElementsMatch(expected, le.Context)
-		assert.Equal("testHandler", le.Entry.LoggerName)
+		assert.Equal("testHandler", le.LoggerName)
 	}
 }
 
