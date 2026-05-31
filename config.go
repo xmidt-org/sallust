@@ -130,7 +130,7 @@ func applyEncoderConfigDefaults(zec *zapcore.EncoderConfig) {
 	}
 
 	if len(zec.NameKey) == 0 {
-		zec.NameKey = "name"
+		zec.NameKey = DefaultNameKey
 	}
 }
 

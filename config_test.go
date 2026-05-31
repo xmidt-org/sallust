@@ -191,7 +191,7 @@ func (suite *ConfigSuite) TestCustom() {
 		Encoding:         "console",
 		OutputPaths:      []string{"/var/log/test/test.log"},
 		ErrorOutputPaths: []string{Stdout},
-		InitialFields: map[string]interface{}{
+		InitialFields: map[string]any{
 			"name":  "value",
 			"slice": []string{"1", "2"},
 		},

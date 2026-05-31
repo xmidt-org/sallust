@@ -28,7 +28,7 @@ func (pt PathTransformer) Transform(path string) (string, error) {
 		path = os.Expand(path, pt.Mapping)
 	}
 
-	if path == "stdout" || path == "stderr" {
+	if path == Stdout || path == Stderr {
 		return path, nil
 	}
 

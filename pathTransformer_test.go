@@ -11,8 +11,6 @@ import (
 )
 
 func testPathTransformerSuccess(t *testing.T) {
-	const testValue = "test"
-
 	testData := []struct {
 		pt       PathTransformer
 		path     string
@@ -25,19 +23,19 @@ func testPathTransformerSuccess(t *testing.T) {
 		},
 		{
 			pt:       PathTransformer{},
-			path:     "stdout",
-			expected: "stdout",
+			path:     Stdout,
+			expected: Stdout,
 		},
 		{
 			pt:       PathTransformer{},
-			path:     "stderr",
-			expected: "stderr",
+			path:     Stderr,
+			expected: Stderr,
 		},
 		{
 			pt: PathTransformer{
 				Mapping: func(v string) string {
-					if v == testValue {
-						return "stdout"
+					if v == "test" {
+						return Stdout
 					}
 
 					return ""
@@ -79,7 +77,7 @@ func testPathTransformerSuccess(t *testing.T) {
 					MaxSize: 150,
 				},
 				Mapping: func(v string) string {
-					if v == testValue {
+					if v == "test" {
 						return "/var/log"
 					}
 
@@ -97,7 +95,7 @@ func testPathTransformerSuccess(t *testing.T) {
 					LocalTime:  true,
 				},
 				Mapping: func(v string) string {
-					if v == testValue {
+					if v == "test" {
 						return "/var/log"
 					}
 

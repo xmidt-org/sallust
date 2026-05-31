@@ -18,8 +18,8 @@ func testDecodeHookNotAString(t *testing.T) {
 	var (
 		assert      = assert.New(t)
 		result, err = DecodeHook(
-			reflect.TypeOf(int(0)),
-			reflect.TypeOf(""),
+			reflect.TypeFor[int](),
+			reflect.TypeFor[string](),
 			123,
 		)
 	)
@@ -32,8 +32,8 @@ func testDecodeHookUnsupported(t *testing.T) {
 	var (
 		assert      = assert.New(t)
 		result, err = DecodeHook(
-			reflect.TypeOf(""),
-			reflect.TypeOf(float64(8.9)),
+			reflect.TypeFor[string](),
+			reflect.TypeFor[float64](),
 			"test",
 		)
 	)
@@ -49,8 +49,8 @@ func testDecodeHookToLevel(t *testing.T) {
 	)
 
 	result, err := DecodeHook(
-		reflect.TypeOf(""),
-		reflect.TypeOf(zapcore.Level(0)),
+		reflect.TypeFor[string](),
+		reflect.TypeFor[zapcore.Level](),
 		"debug",
 	)
 
@@ -58,8 +58,8 @@ func testDecodeHookToLevel(t *testing.T) {
 	assert.NoError(err)
 
 	result, err = DecodeHook(
-		reflect.TypeOf(""),
-		reflect.TypeOf(new(zapcore.Level)),
+		reflect.TypeFor[string](),
+		reflect.TypeFor[*zapcore.Level](),
 		"debug",
 	)
 
@@ -74,8 +74,8 @@ func testDecodeHookToAtomicLevel(t *testing.T) {
 	)
 
 	result, err := DecodeHook(
-		reflect.TypeOf(""),
-		reflect.TypeOf(zap.AtomicLevel{}),
+		reflect.TypeFor[string](),
+		reflect.TypeFor[zap.AtomicLevel](),
 		"debug",
 	)
 
@@ -83,8 +83,8 @@ func testDecodeHookToAtomicLevel(t *testing.T) {
 	assert.NoError(err)
 
 	result, err = DecodeHook(
-		reflect.TypeOf(""),
-		reflect.TypeOf(new(zap.AtomicLevel)),
+		reflect.TypeFor[string](),
+		reflect.TypeFor[*zap.AtomicLevel](),
 		"debug",
 	)
 
@@ -97,8 +97,8 @@ func testDecodeHookToLevelEncoder(t *testing.T) {
 		assert      = assert.New(t)
 		require     = require.New(t)
 		result, err = DecodeHook(
-			reflect.TypeOf(""),
-			reflect.TypeOf(zapcore.LevelEncoder(nil)),
+			reflect.TypeFor[string](),
+			reflect.TypeFor[zapcore.LevelEncoder](),
 			"capital",
 		)
 	)
@@ -131,8 +131,8 @@ func testDecodeHookToTimeEncoder(t *testing.T) {
 		require     = require.New(t)
 		now         = time.Now()
 		result, err = DecodeHook(
-			reflect.TypeOf(""),
-			reflect.TypeOf(zapcore.TimeEncoder(nil)),
+			reflect.TypeFor[string](),
+			reflect.TypeFor[zapcore.TimeEncoder](),
 			"RFC3339",
 		)
 	)
@@ -164,8 +164,8 @@ func testDecodeHookToDurationEncoder(t *testing.T) {
 		assert      = assert.New(t)
 		require     = require.New(t)
 		result, err = DecodeHook(
-			reflect.TypeOf(""),
-			reflect.TypeOf(zapcore.DurationEncoder(nil)),
+			reflect.TypeFor[string](),
+			reflect.TypeFor[zapcore.DurationEncoder](),
 			"string",
 		)
 	)
@@ -200,8 +200,8 @@ func testDecodeHookToCallerEncoder(t *testing.T) {
 		assert      = assert.New(t)
 		require     = require.New(t)
 		result, err = DecodeHook(
-			reflect.TypeOf(""),
-			reflect.TypeOf(zapcore.CallerEncoder(nil)),
+			reflect.TypeFor[string](),
+			reflect.TypeFor[zapcore.CallerEncoder](),
 			"short",
 		)
 	)
@@ -237,8 +237,8 @@ func testDecodeHookToNameEncoder(t *testing.T) {
 		assert      = assert.New(t)
 		require     = require.New(t)
 		result, err = DecodeHook(
-			reflect.TypeOf(""),
-			reflect.TypeOf(zapcore.NameEncoder(nil)),
+			reflect.TypeFor[string](),
+			reflect.TypeFor[zapcore.NameEncoder](),
 			"full",
 		)
 	)

@@ -20,6 +20,14 @@ linters:
       errorf: false
     misspell:
       locale: US
+    goconst:
+      ignore-functions:
+        - assert.Equal
+        - suite.Equal
+      ignore-string-values:
+        - 'transformed.+'
+        - '/test'
+        - 'test'
   exclusions:
     generated: lax
     presets:

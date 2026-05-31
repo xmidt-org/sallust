@@ -51,7 +51,7 @@ func (suite *FxSuite) testWithLoggerFull() {
 			suite.T(),
 			fx.Supply(
 				Config{
-					OutputPaths: []string{"stdout"},
+					OutputPaths: []string{Stdout},
 				},
 				[]zap.Option{
 					zap.Hooks(injectedHook),
