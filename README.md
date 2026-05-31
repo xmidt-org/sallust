@@ -1,4 +1,5 @@
 # sallust
+
 Brings together structured logging, file management, and DI-friendly configuration.
 
 [![Build Status](https://github.com/xmidt-org/sallust/actions/workflows/ci.yml/badge.svg)](https://github.com/xmidt-org/sallust/actions/workflows/ci.yml)

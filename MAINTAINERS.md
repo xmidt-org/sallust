@@ -1,3 +1,3 @@
-Maintainers of this repository:
+# Maintainers of this repository
 
 * John Bass @johnabass
